@@ -1,0 +1,38 @@
+name: headerspdf-homolog
+
+services:
+  headerspdf:
+    build:
+      context: .
+      args:
+        SIMPLE_MODE: "true"
+        VITE_DEFAULT_LANGUAGE: "pt"
+        SITE_URL: "https://homologpdf.headers.com.br"
+        VITE_BRAND_NAME: "Coopanest PDF"
+        VITE_BRAND_LOGO: "images/coopanest-symbol.svg"
+        VITE_FOOTER_TEXT: "© 2026 Coopanest-CE"
+        DISABLE_TOOLS: "wpd-to-pdf,wps-to-pdf,vsd-to-pdf,pub-to-pdf,psd-to-pdf,xps-to-pdf,mobi-to-pdf,epub-to-pdf,fb2-to-pdf,cbz-to-pdf,pdf-to-cbz,pages-to-pdf,odg-to-pdf,prepare-pdf-for-ai,scanner-effect,invert-colors,posterize-pdf,pdf-booklet,n-up-pdf"
+        HEADERS_AIRGAP: "true"
+        VITE_WASM_PYMUPDF_URL: "/wasm/pymupdf/"
+        VITE_WASM_GS_URL: "/wasm/gs/"
+        VITE_WASM_CPDF_URL: "/wasm/cpdf/"
+        VITE_TESSERACT_WORKER_URL: "/wasm/ocr/worker.min.js"
+        VITE_TESSERACT_CORE_URL: "/wasm/ocr/core"
+        VITE_TESSERACT_LANG_URL: "/wasm/ocr/lang-data"
+        VITE_TESSERACT_AVAILABLE_LANGUAGES: "por,eng"
+        VITE_OCR_FONT_BASE_URL: "/wasm/ocr/fonts"
+        VITE_CORS_PROXY_URL: ""
+    image: headers-pdf:homolog
+    container_name: headerspdf-homolog
+    restart: unless-stopped
+    expose:
+      - "8080"
+    environment:
+      - DISABLE_IPV6=true
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    name: headerspdf-net
+    external: true

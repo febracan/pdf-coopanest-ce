@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Assinatura Digital PDF · Coopanest PDF</title>
+    <meta name="title" content="Assinatura Digital PDF · Coopanest PDF" />
+    <meta
+      name="description"
+      content="★ Add digital signature to PDF online free ★ Use X.509 certificates ★ PKCS#7 signatures ★ No signup ★ Privacy-first ★ Works in browser"
+    />
+    <meta
+      name="keywords"
+      content="digital signature pdf, pkcs7 signature, x509 certificate, sign pdf certificate, cryptographic signature"
+    />
+    <meta name="author" content="Coopanest PDF" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+
+    <link rel="canonical" href="https://www.bentopdf.com/digital-sign-pdf" />
+
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:url"
+      content="https://www.bentopdf.com/digital-sign-pdf"
+    />
+    <meta
+      property="og:title"
+      content="Digital Signature PDF Online Free - Add Cryptographic Signature | Coopanest PDF"
+    />
+    <meta
+      property="og:description"
+      content="★ Add digital signature to PDF online free ★ Use X.509 certificates ★ PKCS#7 signatures ★ No signup ★ Privacy-first ★ Works in browser"
+    />
+    <meta
+      property="og:image"
+      content="https://www.bentopdf.com/images/og-digital-sign-pdf.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Coopanest PDF" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:url"
+      content="https://www.bentopdf.com/digital-sign-pdf"
+    />
+    <meta name="twitter:title" content="Digital Signature PDF Free" />
+    <meta
+      name="twitter:description"
+      content="★ Add digital signature to PDF online free ★ Use X.509 certificates ★ PKCS#7 signatures ★ Privacy-first"
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.bentopdf.com/images/twitter-digital-sign-pdf.png"
+    />
+    <meta name="twitter:site" content="@headers" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Assinatura Digital PDF" />
+
+    <link href="/src/css/styles.css" rel="stylesheet" />
+
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+
+  <body class="antialiased bg-gray-900">
+    {{> navbar }}
+
+    <div
+      id="uploader"
+      class="min-h-screen flex flex-col items-center justify-start py-12 p-4 bg-gray-900"
+    >
+      <div
+        id="tool-uploader"
+        class="bg-gray-800 rounded-xl shadow-xl px-4 py-8 md:p-8 max-w-2xl w-full text-gray-200 border border-gray-700"
+      >
+        <button
+          id="back-to-tools"
+          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+        >
+          <i data-lucide="arrow-left" class="cursor-pointer"></i>
+          <span class="cursor-pointer" data-i18n="tools.backToTools">
+            Voltar às Ferramentas
+          </span>
+        </button>
+
+        <h1
+          class="text-2xl font-bold text-white mb-2"
+          data-i18n="tools:digitalSignPdf.name"
+        >
+          Assinatura Digital de PDF
+        </h1>
+        <p class="text-gray-400 mb-4" data-i18n="tools:digitalSignPdf.subtitle">
+          Adicione uma assinatura digital criptográfica ao seu PDF usando
+          certificados X.509. Suporta os formatos PKCS#12 (.pfx, .p12) e PEM.
+          Sua chave privada nunca sai do seu navegador.
+        </p>
+
+        <div
+          class="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-6 flex items-start gap-3"
+        >
+          <i
+            data-lucide="wifi"
+            class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"
+          ></i>
+          <div class="text-sm">
+            <p
+              class="text-blue-300 font-medium"
+              data-i18n="tools:digitalSignPdf.internetRequiredTitle"
+            >
+              Conexão com a internet necessária
+            </p>
+            <p
+              class="text-blue-400/80 mt-1"
+              data-i18n="tools:digitalSignPdf.internetRequiredDescription"
+            >
+              A assinatura pode precisar buscar informações da cadeia de
+              certificados no servidor do emissor do seu certificado para
+              validar a assinatura.
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="drop-zone"
+          class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <i
+              data-lucide="upload-cloud"
+              class="w-10 h-10 mb-3 text-gray-400"
+            ></i>
+            <p class="mb-2 text-sm text-gray-400">
+              <span class="font-semibold" data-i18n="upload.clickToSelect"
+                >Clique para selecionar um arquivo</span
+              >
+              <span data-i18n="upload.orDragAndDrop">ou arraste e solte</span>
+            </p>
+            <p
+              class="text-xs text-gray-500"
+              data-i18n="upload.hints.pdfDocuments"
+            >
+              Documentos PDF
+            </p>
+            <p class="text-xs text-gray-500" data-i18n="upload.filesNeverLeave">
+              Seus arquivos nunca saem do seu dispositivo.
+            </p>
+          </div>
+          <input
+            id="file-input"
+            type="file"
+            class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+            accept="application/pdf"
+          />
+        </div>
+
+        <div id="file-display-area" class="mt-4 space-y-2"></div>
+
+        <div id="certificate-section" class="hidden mt-6 space-y-4">
+          <h2
+            class="text-lg font-semibold text-white"
+            data-i18n="tools:digitalSignPdf.certificateSection"
+          >
+            Certificado
+          </h2>
+
+          <div
+            id="cert-drop-zone"
+            class="relative flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
+          >
+            <div class="flex flex-col items-center justify-center py-4">
+              <i data-lucide="key" class="w-8 h-8 mb-2 text-gray-400"></i>
+              <p
+                class="text-sm text-gray-400"
+                data-i18n="tools:digitalSignPdf.uploadCert"
+              >
+                Enviar certificado (.pfx, .p12, .pem)
+              </p>
+            </div>
+            <input
+              id="cert-input"
+              type="file"
+              class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+              accept=".pfx,.p12,.pem"
+            />
+          </div>
+
+          <div id="cert-display-area" class="space-y-2"></div>
+
+          <div id="cert-password-section" class="hidden">
+            <label
+              for="cert-password"
+              class="block text-sm font-medium text-gray-300 mb-2"
+              data-i18n="tools:digitalSignPdf.certPassword"
+              >Senha do Certificado</label
+            >
+            <input
+              type="password"
+              id="cert-password"
+              class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="Digite a senha do certificado"
+              data-i18n-placeholder="tools:digitalSignPdf.certPasswordPlaceholder"
+            />
+          </div>
+
+          <div id="cert-info" class="hidden bg-gray-700 rounded-lg p-4">
+            <h3
+              class="text-sm font-semibold text-white mb-2"
+              data-i18n="tools:digitalSignPdf.certInfo"
+            >
+              Informações do Certificado
+            </h3>
+            <div class="text-sm text-gray-300 space-y-1">
+              <p>
+                <span
+                  class="text-gray-400"
+                  data-i18n="tools:digitalSignPdf.certSubject"
+                  >Titular:</span
+                >
+                <span id="cert-subject">-</span>
+              </p>
+              <p>
+                <span
+                  class="text-gray-400"
+                  data-i18n="tools:digitalSignPdf.certIssuer"
+                  >Emissor:</span
+                >
+                <span id="cert-issuer">-</span>
+              </p>
+              <p>
+                <span
+                  class="text-gray-400"
+                  data-i18n="tools:digitalSignPdf.certValidity"
+                  >Válido:</span
+                >
+                <span id="cert-validity">-</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div id="signature-options" class="hidden mt-6 space-y-4">
+          <h2
+            class="text-lg font-semibold text-white"
+            data-i18n="tools:digitalSignPdf.signatureDetails"
+          >
+            Detalhes da Assinatura (Opcional)
+          </h2>
+
+          <div>
+            <label
+              for="sign-reason"
+              class="block text-sm font-medium text-gray-300 mb-2"
+              data-i18n="tools:digitalSignPdf.reason"
+              >Motivo</label
+            >
+            <input
+              type="text"
+              id="sign-reason"
+              class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="ex.: Aprovo este documento"
+              data-i18n-placeholder="tools:digitalSignPdf.reasonPlaceholder"
+            />
+          </div>
+
+          <div>
+            <label
+              for="sign-location"
+              class="block text-sm font-medium text-gray-300 mb-2"
+              data-i18n="tools:digitalSignPdf.location"
+              >Local</label
+            >
+            <input
+              type="text"
+              id="sign-location"
+              class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="ex.: São Paulo, Brasil"
+              data-i18n-placeholder="tools:digitalSignPdf.locationPlaceholder"
+            />
+          </div>
+
+          <div>
+            <label
+              for="sign-contact"
+              class="block text-sm font-medium text-gray-300 mb-2"
+              data-i18n="tools:digitalSignPdf.contactInfo"
+              >Informações de Contato</label
+            >
+            <input
+              type="text"
+              id="sign-contact"
+              class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              placeholder="e.g., email@example.com"
+              data-i18n-placeholder="tools:digitalSignPdf.contactPlaceholder"
+            />
+          </div>
+        </div>
+
+        <div id="visible-signature-section" class="hidden mt-6 space-y-4">
+          <div class="flex items-center justify-between">
+            <h2
+              class="text-lg font-semibold text-white"
+              data-i18n="tools:digitalSignPdf.visibleSignature"
+            >
+              Assinatura Visível
+            </h2>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                id="enable-visible-sig"
+                class="sr-only peer"
+              />
+              <div
+                class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-500 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"
+              ></div>
+            </label>
+          </div>
+          <p
+            class="text-xs text-gray-500"
+            data-i18n="tools:digitalSignPdf.visibleSignatureDescription"
+          >
+            Quando ativado, uma caixa de assinatura visível aparece no PDF. Você
+            pode enviar uma imagem/logotipo ou adicionar texto. Se nenhum for
+            fornecido, o nome do signatário do certificado será exibido
+            automaticamente.
+          </p>
+
+          <div id="visible-sig-options" class="hidden space-y-4">
+            <div>
+              <label
+                class="block text-sm font-medium text-gray-300 mb-2"
+                data-i18n="tools:digitalSignPdf.signatureImage"
+                >Imagem/Logotipo da Assinatura (Opcional)</label
+              >
+              <div
+                id="sig-image-drop-zone"
+                class="relative flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
+              >
+                <div class="flex flex-col items-center justify-center py-2">
+                  <i data-lucide="image" class="w-6 h-6 mb-1 text-gray-400"></i>
+                  <p
+                    class="text-xs text-gray-400"
+                    data-i18n="tools:digitalSignPdf.uploadSignatureImage"
+                  >
+                    Enviar imagem (PNG, JPG, WebP)
+                  </p>
+                </div>
+                <input
+                  id="sig-image-input"
+                  type="file"
+                  class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                  accept="image/png,image/jpeg,image/webp"
+                />
+              </div>
+              <div
+                id="sig-image-preview"
+                class="hidden mt-2 flex items-center gap-2"
+              >
+                <img
+                  id="sig-image-thumb"
+                  class="h-12 w-auto rounded border border-gray-600"
+                  alt="Prévia da assinatura"
+                />
+                <button
+                  id="remove-sig-image"
+                  class="text-red-400 hover:text-red-300 text-sm"
+                  data-i18n="tools:digitalSignPdf.remove"
+                >
+                  Remover
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="sig-page"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.page"
+                  >Página</label
+                >
+                <select
+                  id="sig-page"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                >
+                  <option value="0" data-i18n="tools:digitalSignPdf.firstPage">
+                    Primeira página
+                  </option>
+                  <option
+                    value="last"
+                    data-i18n="tools:digitalSignPdf.lastPage"
+                  >
+                    Última página
+                  </option>
+                  <option value="all" data-i18n="tools:digitalSignPdf.allPages">
+                    Todas as páginas
+                  </option>
+                  <option
+                    value="custom"
+                    data-i18n="tools:digitalSignPdf.customPage"
+                  >
+                    Nº de página personalizado
+                  </option>
+                </select>
+              </div>
+              <div id="custom-page-wrapper" class="hidden">
+                <label
+                  for="sig-custom-page"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.pageNumber"
+                  >Nº da Página</label
+                >
+                <input
+                  type="number"
+                  id="sig-custom-page"
+                  min="1"
+                  value="1"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="sig-x"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.xPosition"
+                  >Posição X (esquerda)</label
+                >
+                <input
+                  type="number"
+                  id="sig-x"
+                  min="0"
+                  value="25"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  for="sig-y"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.yPosition"
+                  >Posição Y (topo)</label
+                >
+                <input
+                  type="number"
+                  id="sig-y"
+                  min="0"
+                  value="700"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label
+                  for="sig-width"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.width"
+                  >Largura</label
+                >
+                <input
+                  type="number"
+                  id="sig-width"
+                  min="20"
+                  value="150"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label
+                  for="sig-height"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.height"
+                  >Altura</label
+                >
+                <input
+                  type="number"
+                  id="sig-height"
+                  min="20"
+                  value="70"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div class="border-t border-gray-700 pt-4">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  id="enable-sig-text"
+                  class="w-4 h-4 text-indigo-600 bg-gray-700 border-gray-600 rounded focus:ring-indigo-500"
+                />
+                <span
+                  class="text-sm font-medium text-gray-300"
+                  data-i18n="tools:digitalSignPdf.addTextOverlay"
+                  >Adicionar sobreposição de texto</span
+                >
+              </label>
+            </div>
+
+            <div id="sig-text-options" class="hidden space-y-4">
+              <div>
+                <label
+                  for="sig-text"
+                  class="block text-sm font-medium text-gray-300 mb-2"
+                  data-i18n="tools:digitalSignPdf.text"
+                  >Texto</label
+                >
+                <input
+                  type="text"
+                  id="sig-text"
+                  class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  placeholder="ex.: Assinado digitalmente por João Silva"
+                  data-i18n-placeholder="tools:digitalSignPdf.textPlaceholder"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label
+                    for="sig-text-color"
+                    class="block text-sm font-medium text-gray-300 mb-2"
+                    data-i18n="tools:digitalSignPdf.textColor"
+                    >Cor do Texto</label
+                  >
+                  <input type="color" id="sig-text-color" value="#000000" />
+                </div>
+                <div>
+                  <label
+                    for="sig-text-size"
+                    class="block text-sm font-medium text-gray-300 mb-2"
+                    data-i18n="tools:digitalSignPdf.fontSize"
+                    >Tamanho da Fonte</label
+                  >
+                  <input
+                    type="number"
+                    id="sig-text-size"
+                    min="6"
+                    max="72"
+                    value="12"
+                    class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          id="process-btn"
+          class="btn-gradient w-full mt-6"
+          style="display: none"
+          data-i18n="tools:digitalSignPdf.applySignature"
+        >
+          Aplicar Assinatura Digital
+        </button>
+      </div>
+    </div>
+
+    <div
+      id="loader-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+      >
+        <div class="solid-spinner"></div>
+        <p
+          id="loader-text"
+          class="text-white text-lg font-medium"
+          data-i18n="loader.processing"
+        >
+          Processando...
+        </p>
+      </div>
+    </div>
+
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-700"
+      >
+        <h3
+          id="alert-title"
+          class="text-xl font-bold text-white mb-2"
+          data-i18n="alert.title"
+        >
+          Alerta
+        </h3>
+        <p id="alert-message" class="text-gray-300 mb-6"></p>
+        <button
+          id="alert-ok"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+          data-i18n="common.ok"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-8 text-center"
+        data-i18n="howItWorks.title"
+      >
+        Como Funciona
+      </h2>
+      <div class="space-y-6">
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            1
+          </div>
+          <div class="flex-1">
+            <h3
+              class="text-lg font-semibold text-white mb-1"
+              data-i18n="tools:digitalSignPdf.howToStep1Title"
+            >
+              Enviar PDF
+            </h3>
+            <p
+              class="text-gray-400"
+              data-i18n="tools:digitalSignPdf.howToStep1Text"
+            >
+              Selecione o documento PDF que você deseja assinar
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            2
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              <span data-i18n="tools:digitalSignPdf.howToStep2Title">
+                Enviar Certificado
+              </span>
+            </h3>
+            <p
+              class="text-gray-400"
+              data-i18n="tools:digitalSignPdf.howToStep2Text"
+            >
+              Forneça seu arquivo de certificado .pfx ou .p12 e a senha
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            3
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              <span data-i18n="tools:digitalSignPdf.howToStep3Title">
+                Assinar e Baixar
+              </span>
+            </h3>
+            <p
+              class="text-gray-400"
+              data-i18n="tools:digitalSignPdf.howToStep3Text"
+            >
+              Aplique a assinatura digital e baixe seu PDF assinado
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-6xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="relatedTools.title"
+      >
+        Ferramentas de PDF Relacionadas
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <a
+          href="encrypt-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3
+            class="text-white font-semibold mb-1"
+            data-i18n="tools:encryptPdf.name"
+          >
+            Criptografar PDF
+          </h3>
+          <p
+            class="text-gray-400 text-sm"
+            data-i18n="tools:digitalSignPdf.relatedEncryptDesc"
+          >
+            Proteja seu PDF com senha
+          </p>
+        </a>
+        <a
+          href="decrypt-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3
+            class="text-white font-semibold mb-1"
+            data-i18n="tools:decryptPdf.name"
+          >
+            Descriptografar PDF
+          </h3>
+          <p
+            class="text-gray-400 text-sm"
+            data-i18n="tools:digitalSignPdf.relatedDecryptDesc"
+          >
+            Remover a senha do PDF
+          </p>
+        </a>
+        <a
+          href="flatten-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3
+            class="text-white font-semibold mb-1"
+            data-i18n="tools:flattenPdf.name"
+          >
+            Achatar PDF
+          </h3>
+          <p
+            class="text-gray-400 text-sm"
+            data-i18n="tools:digitalSignPdf.relatedFlattenDesc"
+          >
+            Tornar anotações permanentes
+          </p>
+        </a>
+        <a
+          href="sanitize-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3
+            class="text-white font-semibold mb-1"
+            data-i18n="tools:sanitizePdf.name"
+          >
+            Sanitizar PDF
+          </h3>
+          <p
+            class="text-gray-400 text-sm"
+            data-i18n="tools:digitalSignPdf.relatedSanitizeDesc"
+          >
+            Remover dados ocultos
+          </p>
+        </a>
+        <a
+          href="change-permissions.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3
+            class="text-white font-semibold mb-1"
+            data-i18n="tools:changePermissions.name"
+          >
+            Alterar Permissões
+          </h3>
+          <p
+            class="text-gray-400 text-sm"
+            data-i18n="tools:digitalSignPdf.relatedPermissionsDesc"
+          >
+            Definir permissões do PDF
+          </p>
+        </a>
+      </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="faq.sectionTitle"
+      >
+        Perguntas Frequentes
+      </h2>
+      <div class="space-y-4">
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+            data-i18n="tools:digitalSignPdf.faqWhatIsQuestion"
+          >
+            O que é uma assinatura digital?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p
+            class="mt-3 text-gray-400"
+            data-i18n="tools:digitalSignPdf.faqWhatIsAnswer"
+          >
+            Uma assinatura digital é um mecanismo criptográfico que verifica a
+            autenticidade e a integridade de um documento. Diferente de uma
+            assinatura desenhada, ela usa criptografia de chave pública
+            (certificados X.509) para comprovar a identidade do signatário.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+            data-i18n="tools:digitalSignPdf.faqFormatsQuestion"
+          >
+            Quais formatos de certificado são suportados?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p
+            class="mt-3 text-gray-400"
+            data-i18n="tools:digitalSignPdf.faqFormatsAnswer"
+          >
+            Suportamos certificados no formato PKCS#12 (.pfx, .p12), que contêm
+            tanto o seu certificado quanto a chave privada em um único arquivo
+            criptografado. Eles são comumente emitidos por autoridades
+            certificadoras.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+            data-i18n="tools:digitalSignPdf.faqPrivateKeyQuestion"
+          >
+            Minha chave privada está segura?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p
+            class="mt-3 text-gray-400"
+            data-i18n="tools:digitalSignPdf.faqPrivateKeyAnswer"
+          >
+            Sim! Todo o processamento acontece inteiramente no seu navegador.
+            Seu certificado, chave privada e arquivos PDF nunca saem do seu
+            dispositivo nem são enviados a nenhum servidor.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+            data-i18n="tools:digitalSignPdf.faqValidReadersQuestion"
+          >
+            A assinatura será válida em leitores de PDF?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p
+            class="mt-3 text-gray-400"
+            data-i18n="tools:digitalSignPdf.faqValidReadersAnswer"
+          >
+            Sim, a ferramenta cria assinaturas PKCS#7 destacadas padrão que são
+            reconhecidas por todos os principais visualizadores de PDF. Para
+            validação completa, use um certificado de uma Autoridade
+            Certificadora confiável.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    {{> footer }}
+
+    <script type="module" src="/src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="/src/js/utils/full-width.ts"></script>
+    <script type="module" src="/src/js/utils/simple-mode-footer.ts"></script>
+    <script type="module" src="/src/js/logic/digital-sign-pdf-page.ts"></script>
+    <script type="module" src="/src/js/mobileMenu.ts"></script>
+    <script type="module" src="/src/js/main.ts"></script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Digital Signature PDF - Coopanest PDF",
+        "applicationCategory": "PDF Tool",
+        "operatingSystem": "Any - Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to add digital signature to PDF",
+        "description": "Learn how to add a cryptographic digital signature to PDF using Coopanest PDF",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Upload PDF",
+            "text": "Select the PDF document you want to sign"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Upload Certificate",
+            "text": "Provide your .pfx or .p12 certificate file and password"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Sign & Download",
+            "text": "Apply the digital signature and download your signed PDF"
+          }
+        ]
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.bentopdf.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Digital Signature PDF",
+            "item": "https://www.bentopdf.com/digital-sign-pdf"
+          }
+        ]
+      }
+    </script>
+  </body>
+</html>

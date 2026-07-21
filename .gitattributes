@@ -1,0 +1,8 @@
+# Shell scripts and entrypoints MUST use LF — CRLF breaks the shebang in Alpine
+# (container crash-loops with exit 127 "not found"). Force LF regardless of the
+# checkout platform's core.autocrlf setting.
+*.sh        text eol=lf
+entrypoint.sh text eol=lf
+nginx-*.sh  text eol=lf
+Dockerfile  text eol=lf
+*.mjs       text eol=lf
