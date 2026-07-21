@@ -1,6 +1,6 @@
 ARG BASE_URL=
 
-FROM public.ecr.aws/docker/library/node:20-alpine AS builder
+FROM public.ecr.aws/docker/library/node:26-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
 COPY vendor ./vendor
