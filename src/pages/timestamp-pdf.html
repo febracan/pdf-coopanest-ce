@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Carimbo de tempo PDF · Coopanest PDF</title>
+    <meta name="title" content="Carimbo de tempo PDF · Coopanest PDF" />
+    <meta
+      name="description"
+      content="★ Add RFC 3161 document timestamp to PDF online free ★ Trusted TSA servers ★ No certificate required ★ Privacy-first ★ Works in browser"
+    />
+    <meta
+      name="keywords"
+      content="timestamp pdf, rfc 3161, tsa server, document timestamp, time stamp authority, pdf timestamp"
+    />
+    <meta name="author" content="Coopanest PDF" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+
+    <link rel="canonical" href="https://www.bentopdf.com/timestamp-pdf" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.bentopdf.com/timestamp-pdf" />
+    <meta
+      property="og:title"
+      content="Timestamp PDF Online Free - RFC 3161 Document Timestamp | Coopanest PDF"
+    />
+    <meta
+      property="og:description"
+      content="★ Add RFC 3161 document timestamp to PDF online free ★ Trusted TSA servers ★ No certificate required ★ Privacy-first ★ Works in browser"
+    />
+    <meta
+      property="og:image"
+      content="https://www.bentopdf.com/images/og-timestamp-pdf.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Coopanest PDF" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.bentopdf.com/timestamp-pdf" />
+    <meta name="twitter:title" content="Timestamp PDF Free" />
+    <meta
+      name="twitter:description"
+      content="★ Add RFC 3161 document timestamp to PDF online free ★ Trusted TSA servers ★ Privacy-first"
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.bentopdf.com/images/twitter-timestamp-pdf.png"
+    />
+    <meta name="twitter:site" content="@headers" />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Carimbo de tempo PDF" />
+
+    <link href="/src/css/styles.css" rel="stylesheet" />
+
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+
+  <body class="antialiased bg-gray-900">
+    {{> navbar }}
+
+    <div
+      id="uploader"
+      class="min-h-screen flex flex-col items-center justify-start py-12 p-4 bg-gray-900"
+    >
+      <div
+        id="tool-uploader"
+        class="bg-gray-800 rounded-xl shadow-xl px-4 py-8 md:p-8 max-w-2xl w-full text-gray-200 border border-gray-700"
+      >
+        <button
+          id="back-to-tools"
+          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+        >
+          <i data-lucide="arrow-left" class="cursor-pointer"></i>
+          <span class="cursor-pointer" data-i18n="tools.backToTools">
+            Voltar às Ferramentas
+          </span>
+        </button>
+
+        <h1
+          class="text-2xl font-bold text-white mb-2"
+          data-i18n="tools:timestampPdf.name"
+        >
+          Carimbo de Tempo em PDF
+        </h1>
+        <p class="text-gray-400 mb-4" data-i18n="tools:timestampPdf.subtitle">
+          Adicione um carimbo de tempo de documento RFC 3161 ao seu PDF usando
+          um servidor confiável de Autoridade de Carimbo de Tempo (TSA). Prova
+          que seu documento existiu em um momento específico. Nenhum certificado
+          necessário.
+        </p>
+
+        <div
+          class="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-6 flex items-start gap-3"
+        >
+          <i
+            data-lucide="wifi"
+            class="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5"
+          ></i>
+          <div class="text-sm">
+            <p class="text-blue-300 font-medium">
+              Conexão com a internet necessária
+            </p>
+            <p class="text-blue-400/80 mt-1">
+              O carimbo de tempo requer contato com o servidor TSA selecionado
+              para obter um token de carimbo de tempo confiável.
+            </p>
+          </div>
+        </div>
+
+        <div
+          id="drop-zone"
+          class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <i
+              data-lucide="upload-cloud"
+              class="w-10 h-10 mb-3 text-gray-400"
+            ></i>
+            <p class="mb-2 text-sm text-gray-400">
+              <span class="font-semibold" data-i18n="upload.clickToSelect"
+                >Clique para selecionar um arquivo</span
+              >
+              <span data-i18n="upload.orDragAndDrop">ou arraste e solte</span>
+            </p>
+            <p
+              class="text-xs text-gray-500"
+              data-i18n="upload.hints.pdfDocuments"
+            >
+              Documentos PDF
+            </p>
+            <p class="text-xs text-gray-500" data-i18n="upload.filesNeverLeave">
+              Seus arquivos nunca saem do seu dispositivo.
+            </p>
+          </div>
+          <input
+            id="file-input"
+            type="file"
+            class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+            accept="application/pdf"
+          />
+        </div>
+
+        <div id="file-display-area" class="mt-4 space-y-2"></div>
+
+        <div id="tsa-section" class="hidden mt-6 space-y-4">
+          <h3
+            class="text-lg font-semibold text-white"
+            data-i18n="tools:timestampPdf.tsaSectionTitle"
+          >
+            Servidor de Carimbo de Tempo (TSA)
+          </h3>
+
+          <div>
+            <label
+              for="tsa-preset"
+              class="block text-sm font-medium text-gray-300 mb-1"
+              data-i18n="tools:timestampPdf.selectTsa"
+            >
+              Selecione um servidor TSA
+            </label>
+            <select
+              id="tsa-preset"
+              class="w-full bg-gray-700 border border-gray-600 text-gray-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            ></select>
+          </div>
+
+          <button
+            id="process-btn"
+            class="btn-gradient w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled
+            data-i18n="tools:timestampPdf.applyTimestamp"
+          >
+            Aplicar Carimbo de Tempo
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader Modal -->
+    <div
+      id="loader-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+      >
+        <div class="solid-spinner"></div>
+        <p id="loader-text" class="text-white text-lg font-medium">
+          Processando...
+        </p>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-700"
+      >
+        <h3
+          id="alert-title"
+          class="text-xl font-bold text-white mb-2"
+          data-i18n="alert.title"
+        >
+          Alerta
+        </h3>
+        <p id="alert-message" class="text-gray-300 mb-6"></p>
+        <button
+          id="alert-ok"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-8 text-center"
+        data-i18n="howItWorks.title"
+      >
+        Como Funciona
+      </h2>
+      <div class="space-y-6">
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            1
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">Enviar PDF</h3>
+            <p class="text-gray-400">
+              Selecione o documento PDF que deseja carimbar
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            2
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              Escolha o Servidor TSA
+            </h3>
+            <p class="text-gray-400">
+              Selecione um dos servidores TSA confiáveis
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            3
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              Carimbar e Baixar
+            </h3>
+            <p class="text-gray-400">
+              Aplique o carimbo de tempo RFC 3161 e baixe seu PDF carimbado
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-6xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="relatedTools.title"
+      >
+        Ferramentas de PDF Relacionadas
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <a
+          href="digital-sign-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Assinatura Digital</h3>
+          <p class="text-gray-400 text-sm">Assine com certificado X.509</p>
+        </a>
+        <a
+          href="validate-signature-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Validar Assinatura</h3>
+          <p class="text-gray-400 text-sm">Verifique assinaturas digitais</p>
+        </a>
+        <a
+          href="encrypt-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Criptografar PDF</h3>
+          <p class="text-gray-400 text-sm">Proteja seu PDF com senha</p>
+        </a>
+        <a
+          href="flatten-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Achatar PDF</h3>
+          <p class="text-gray-400 text-sm">Torne as anotações permanentes</p>
+        </a>
+        <a
+          href="sanitize-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Sanitizar PDF</h3>
+          <p class="text-gray-400 text-sm">Remova dados ocultos</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="faq.sectionTitle"
+      >
+        Perguntas Frequentes
+      </h2>
+      <div class="space-y-4">
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            O que é um carimbo de tempo de documento?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Um carimbo de tempo de documento (RFC 3161) é uma prova
+            criptográfica de que seu PDF existiu em um momento específico. Um
+            servidor confiável de Autoridade de Carimbo de Tempo (TSA) assina um
+            hash do seu documento junto com a hora atual, criando um carimbo de
+            tempo à prova de adulteração incorporado no PDF.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            Preciso de um certificado?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Não. Diferentemente de uma assinatura digital, um carimbo de tempo
+            de documento não requer um certificado pessoal. O servidor TSA
+            fornece o carimbo de tempo confiável usando seu próprio certificado.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            Meu documento é enviado ao servidor TSA?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Não. Apenas um hash criptográfico (SHA-256) do seu documento é
+            enviado ao servidor TSA. O conteúdo real do seu PDF nunca sai do seu
+            navegador.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            O carimbo de tempo será válido em leitores de PDF?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Sim. A ferramenta cria um carimbo de tempo de documento RFC 3161
+            padrão (SubFilter ETSI.RFC3161) que é reconhecido pelo Adobe Acrobat
+            e outros visualizadores de PDF importantes.
+          </p>
+        </details>
+      </div>
+    </section>
+
+    {{> footer }}
+
+    <script type="module" src="/src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="/src/js/utils/full-width.ts"></script>
+    <script type="module" src="/src/js/utils/simple-mode-footer.ts"></script>
+    <script type="module" src="/src/js/logic/timestamp-pdf-page.ts"></script>
+    <script type="module" src="/src/js/mobileMenu.ts"></script>
+    <script type="module" src="/src/js/main.ts"></script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Timestamp PDF - Coopanest PDF",
+        "applicationCategory": "PDF Tool",
+        "operatingSystem": "Any - Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to add a timestamp to PDF",
+        "description": "Learn how to add an RFC 3161 document timestamp to PDF using Coopanest PDF",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Upload PDF",
+            "text": "Select the PDF document you want to timestamp"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Choose TSA Server",
+            "text": "Select one of the trusted TSA servers"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Timestamp & Download",
+            "text": "Apply the RFC 3161 timestamp and download your timestamped PDF"
+          }
+        ]
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.bentopdf.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Timestamp PDF",
+            "item": "https://www.bentopdf.com/timestamp-pdf"
+          }
+        ]
+      }
+    </script>
+  </body>
+</html>

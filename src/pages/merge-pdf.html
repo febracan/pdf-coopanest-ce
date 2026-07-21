@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>Mesclar PDF · Coopanest PDF</title>
+    <meta name="title" content="Mesclar PDF · Coopanest PDF" />
+    <meta
+      name="description"
+      content="★ Merge PDF files instantly - Combine multiple PDFs into one ★ Free forever ★ No file limits ★ Drag & drop pages ★ Privacy-first ★ Works in browser"
+    />
+    <meta
+      name="keywords"
+      content="merge pdf, combine pdf, join pdf files, pdf merger, concatenate pdf, merge pdf free, combine pdf online"
+    />
+    <meta name="author" content="Coopanest PDF" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://www.bentopdf.com/merge-pdf" />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.bentopdf.com/merge-pdf" />
+    <meta
+      property="og:title"
+      content="Merge PDF Free - Combine Multiple PDF Files | Coopanest PDF"
+    />
+    <meta
+      property="og:description"
+      content="Free PDF merger. Combine multiple PDFs into one document. No signup, unlimited files, privacy-first."
+    />
+    <meta
+      property="og:image"
+      content="https://www.bentopdf.com/images/og-merge-pdf.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content="Coopanest PDF" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://www.bentopdf.com/merge-pdf" />
+    <meta name="twitter:title" content="Merge PDF Free - Combine PDFs" />
+    <meta
+      name="twitter:description"
+      content="Free PDF merger. Combine multiple PDFs, no signup, privacy-first."
+    />
+    <meta
+      name="twitter:image"
+      content="https://www.bentopdf.com/images/twitter-merge-pdf.png"
+    />
+    <meta name="twitter:site" content="@headers" />
+
+    <!-- Mobile Web App -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Mesclar PDF" />
+
+    <link href="/src/css/styles.css" rel="stylesheet" />
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+  </head>
+
+  <body class="antialiased bg-gray-900">
+    {{> navbar }}
+
+    <div
+      id="uploader"
+      class="min-h-screen flex flex-col items-center justify-start py-12 p-4 bg-gray-900"
+    >
+      <div
+        id="tool-uploader"
+        class="bg-gray-800 rounded-xl shadow-xl px-4 py-8 md:p-8 max-w-2xl w-full text-gray-200 border border-gray-700"
+      >
+        <button
+          id="back-to-tools"
+          class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 mb-6 font-semibold"
+        >
+          <i data-lucide="arrow-left" class="cursor-pointer"></i>
+          <span class="cursor-pointer" data-i18n="tools.backToTools">
+            Voltar às ferramentas
+          </span>
+        </button>
+
+        <h1
+          class="text-2xl font-bold text-white mb-2"
+          data-i18n="tools:mergePdf.name"
+        >
+          Mesclar PDF
+        </h1>
+        <p class="text-gray-400 mb-6" data-i18n="tools:mergePdf.subtitle">
+          Combine arquivos inteiros ou selecione páginas específicas para
+          mesclar em um novo documento.
+        </p>
+
+        <!-- Drop Zone for Main PDF Upload -->
+        <div
+          id="drop-zone"
+          class="relative flex flex-col items-center justify-center w-full h-48 md:h-64 border-2 border-dashed border-gray-600 rounded-xl cursor-pointer bg-gray-900 hover:bg-gray-700 transition-colors duration-300"
+        >
+          <div class="flex flex-col items-center justify-center pt-5 pb-6">
+            <i
+              data-lucide="upload-cloud"
+              class="w-10 h-10 mb-3 text-gray-400"
+            ></i>
+            <p class="mb-2 text-sm text-gray-400">
+              <span class="font-semibold" data-i18n="upload.clickToSelect"
+                >Clique para selecionar um arquivo</span
+              >
+              <span data-i18n="upload.orDragAndDrop">ou arraste e solte</span>
+            </p>
+            <p class="text-xs text-gray-500" data-i18n="upload.pdfOrImages">
+              PDFs ou imagens
+            </p>
+            <p class="text-xs text-gray-500" data-i18n="upload.filesNeverLeave">
+              Seus arquivos nunca saem do seu dispositivo.
+            </p>
+          </div>
+          <input
+            id="file-input"
+            type="file"
+            class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+            multiple
+            accept="application/pdf"
+          />
+        </div>
+
+        <!-- Control buttons for multi-file uploads -->
+        <div id="file-controls" class="hidden mt-4 flex gap-3">
+          <button
+            id="add-more-btn"
+            class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <i data-lucide="plus"></i>
+            <span data-i18n="upload.addMore">Adicionar mais arquivos</span>
+          </button>
+          <button
+            id="clear-files-btn"
+            class="btn bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
+          >
+            <i data-lucide="trash-2"></i>
+            <span data-i18n="upload.clearAll">Limpar tudo</span>
+          </button>
+        </div>
+
+        <div id="merge-options" class="hidden mt-6">
+          <div
+            class="flex gap-2 p-1 rounded-lg bg-gray-900 border border-gray-700 mb-4"
+          >
+            <button
+              id="file-mode-btn"
+              class="flex-1 btn bg-indigo-600 text-white font-semibold py-2 rounded-md"
+            >
+              Modo arquivo
+            </button>
+            <button
+              id="page-mode-btn"
+              class="flex-1 btn text-gray-300 font-semibold py-2 rounded-md"
+            >
+              Modo página
+            </button>
+          </div>
+
+          <div id="file-mode-panel">
+            <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
+              <p class="text-sm text-gray-300">
+                <strong class="text-white">Como funciona:</strong>
+              </p>
+              <ul
+                class="list-disc list-inside text-xs text-gray-400 mt-1 space-y-1"
+              >
+                <li>
+                  Clique e arraste o ícone
+                  <i
+                    data-lucide="grip-vertical"
+                    class="inline-block w-3 h-3"
+                  ></i>
+                  para alterar a ordem dos arquivos.
+                </li>
+                <li>
+                  Na caixa "Páginas" de cada arquivo, você pode especificar
+                  intervalos (ex.: "1-3, 5") para mesclar apenas essas páginas.
+                </li>
+                <li>
+                  Deixe a caixa "Páginas" em branco para incluir todas as
+                  páginas daquele arquivo.
+                </li>
+              </ul>
+            </div>
+            <ul id="file-list" class="space-y-2"></ul>
+          </div>
+
+          <div id="page-mode-panel" class="hidden">
+            <div class="p-3 bg-gray-900 rounded-lg border border-gray-700 mb-3">
+              <p class="text-sm text-gray-300">
+                <strong class="text-white">Como funciona:</strong>
+              </p>
+              <ul
+                class="list-disc list-inside text-xs text-gray-400 mt-1 space-y-1"
+              >
+                <li>
+                  Todas as páginas dos PDFs enviados são mostradas abaixo.
+                </li>
+                <li>
+                  Basta arrastar e soltar as miniaturas de cada página para
+                  criar a ordem exata que você deseja para seu novo arquivo.
+                </li>
+              </ul>
+            </div>
+            <div
+              id="page-merge-preview"
+              class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-4 p-4 bg-gray-900 rounded-lg border border-gray-700 min-h-[200px]"
+            ></div>
+          </div>
+
+          <label
+            class="mt-4 flex items-start gap-2 text-sm text-gray-300 cursor-pointer"
+          >
+            <input
+              type="checkbox"
+              id="retain-page-labels"
+              class="mt-0.5 w-4 h-4 rounded text-indigo-600 bg-gray-700 border-gray-600"
+            />
+            <span>
+              <span
+                class="font-medium"
+                data-i18n="tools:mergePdf.retainPageLabels"
+              >
+                Manter os rótulos de página originais de cada arquivo
+              </span>
+              <span
+                class="block text-xs text-gray-400 mt-0.5"
+                data-i18n="tools:mergePdf.retainPageLabelsHint"
+              >
+                Desativado (padrão): o PDF mesclado usa numeração natural de
+                páginas 1–N. Ativado: os rótulos de página originais de cada
+                arquivo são preservados (pode gerar rótulos duplicados).
+              </span>
+            </span>
+          </label>
+
+          <button id="process-btn" class="btn-gradient w-full mt-6">
+            Mesclar PDFs
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loader Modal -->
+    <div
+      id="loader-modal"
+      class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
+    >
+      <div
+        class="bg-gray-800 p-8 rounded-lg flex flex-col items-center gap-4 border border-gray-700 shadow-xl"
+      >
+        <div class="solid-spinner"></div>
+        <p id="loader-text" class="text-white text-lg font-medium">
+          Processando...
+        </p>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-gray-900 bg-opacity-90 flex items-center justify-center z-50 hidden"
+    >
+      <div
+        class="bg-gray-800 rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-700"
+      >
+        <h3
+          id="alert-title"
+          class="text-xl font-bold text-white mb-2"
+          data-i18n="alert.title"
+          data-i18n="alert.title"
+        >
+          Alert
+        </h3>
+        <p id="alert-message" class="text-gray-300 mb-6"></p>
+        <button
+          id="alert-ok"
+          class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+        >
+          OK
+        </button>
+      </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-8 text-center"
+        data-i18n="howItWorks.title"
+      >
+        Como funciona
+      </h2>
+      <div class="space-y-6">
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            1
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">Enviar PDFs</h3>
+            <p class="text-gray-400">
+              Selecione ou arraste e solte os vários arquivos PDF que deseja
+              mesclar
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            2
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              Organizar a ordem
+            </h3>
+            <p class="text-gray-400">
+              Arraste os arquivos para cima ou para baixo para reordená-los na
+              sequência que preferir
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            3
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">
+              Mesclar arquivos
+            </h3>
+            <p class="text-gray-400">
+              Clique no botão de mesclar para combinar todos os PDFs em um único
+              documento
+            </p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4">
+          <div
+            class="flex-shrink-0 w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold"
+          >
+            4
+          </div>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-white mb-1">Baixar</h3>
+            <p class="text-gray-400">
+              Salve seu PDF mesclado - todas as páginas combinadas na ordem que
+              você escolheu
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Related Tools Section -->
+    <section class="max-w-6xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="relatedTools.title"
+      >
+        Ferramentas de PDF relacionadas
+      </h2>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <a
+          href="split-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Dividir PDF</h3>
+          <p class="text-gray-400 text-sm">
+            Ferramenta de dividir PDF online e gratuita
+          </p>
+        </a>
+        <a
+          href="organize-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Organizar PDF</h3>
+          <p class="text-gray-400 text-sm">
+            Ferramenta de organizar PDF online e gratuita
+          </p>
+        </a>
+        <a
+          href="compress-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Comprimir PDF</h3>
+          <p class="text-gray-400 text-sm">
+            Ferramenta de comprimir PDF online e gratuita
+          </p>
+        </a>
+        <a
+          href="rotate-pdf.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Girar PDF</h3>
+          <p class="text-gray-400 text-sm">
+            Ferramenta de girar PDF online e gratuita
+          </p>
+        </a>
+        <a
+          href="delete-pages.html"
+          class="block bg-gray-800 p-4 rounded-lg hover:bg-gray-700 transition-colors border border-gray-700"
+        >
+          <h3 class="text-white font-semibold mb-1">Excluir páginas</h3>
+          <p class="text-gray-400 text-sm">
+            Ferramenta de excluir páginas online e gratuita
+          </p>
+        </a>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="max-w-4xl mx-auto px-4 py-12">
+      <h2
+        class="text-2xl md:text-3xl font-bold text-white mb-6 text-center"
+        data-i18n="faq.sectionTitle"
+      >
+        Perguntas frequentes
+      </h2>
+      <div class="space-y-4">
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            Quantos PDFs posso mesclar de uma vez?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Ilimitado! Mescle quantos arquivos PDF precisar em uma única
+            operação. Sem restrições de quantidade de arquivos ou tamanho total.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            A mesclagem reduz a qualidade do PDF?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Não! O Coopanest PDF preserva a qualidade original de todos os PDFs
+            ao mesclar. Seus documentos continuam nítidos e claros, sem perda de
+            qualidade.
+          </p>
+        </details>
+        <details class="bg-gray-800 p-5 rounded-lg border border-gray-700">
+          <summary
+            class="cursor-pointer font-semibold text-white flex items-center justify-between"
+          >
+            Posso reordenar as páginas depois de selecionar os arquivos?
+            <i data-lucide="chevron-down" class="w-5 h-5"></i>
+          </summary>
+          <p class="mt-3 text-gray-400">
+            Sim! Basta arrastar e soltar os arquivos para organizá-los em
+            qualquer ordem antes de clicar no botão de mesclar.
+          </p>
+        </details>
+      </div>
+    </section>
+    {{> footer }}
+    <script type="module" src="/src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="/src/js/utils/full-width.ts"></script>
+    <script type="module" src="/src/js/utils/simple-mode-footer.ts"></script>
+    <script type="module" src="/src/js/logic/merge-pdf-page.ts"></script>
+    <script type="module" src="/src/js/mobileMenu.ts"></script>
+    <script type="module" src="/src/js/main.ts"></script>
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Merge PDF - Coopanest PDF",
+        "applicationCategory": "PDF Merger Tool",
+        "operatingSystem": "Any - Web Browser",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "featureList": [
+          "Merge multiple PDFs into one",
+          "Drag and drop to reorder files",
+          "Select specific pages to merge",
+          "Page-level merging",
+          "Batch PDF combining",
+          "No file limits"
+        ]
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        "name": "How to Merge PDF Files Online",
+        "description": "Learn how to combine multiple PDF files into a single document",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Upload PDF Files",
+            "text": "Click or drag and drop multiple PDF files"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Arrange Files",
+            "text": "Drag files to reorder them or select specific pages to include"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Merge PDFs",
+            "text": "Click 'Merge PDFs' to combine all files into one document"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Download",
+            "text": "Download your merged PDF file"
+          }
+        ]
+      }
+    </script>
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://www.bentopdf.com"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Merge PDF",
+            "item": "https://www.bentopdf.com/merge-pdf"
+          }
+        ]
+      }
+    </script>
+  </body>
+</html>

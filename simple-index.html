@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#038d4f" />
+
+    <title>Coopanest PDF</title>
+    <meta name="title" content="Coopanest PDF" />
+    <meta
+      name="description"
+      content="Ferramentas de PDF da Coopanest-CE — mesclar, dividir, comprimir, converter, assinar e OCR. 100% no seu navegador, sem upload. Baseado no BentoPDF."
+    />
+
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Coopanest PDF" />
+
+    <link rel="icon" type="image/svg+xml" href="/images/favicon.svg" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/images/apple-touch-icon.png"
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+
+    <link href="src/css/styles.css" rel="stylesheet" />
+  </head>
+
+  <body class="hp-body">
+    <div class="hp-layout">
+      <aside class="hp-sidebar" id="hp-sidebar">
+        <a class="hp-brand" href="{{baseUrl}}" aria-label="Coopanest PDF">
+          <img
+            class="hp-brand-logo"
+            src="{{baseUrl}}images/coopanest-logo.png"
+            alt="Coopanest"
+          />
+          <span class="hp-brand-pdf">PDF</span>
+        </a>
+
+        <nav class="hp-nav" id="hp-nav" aria-label="Categorias"></nav>
+
+        <div class="hp-somos">
+          <img
+            class="hp-somos-seal"
+            src="{{baseUrl}}images/somos-coop.png"
+            alt="Selo SomosCoop — Sistema Cooperativista"
+            width="132"
+            height="76"
+          />
+        </div>
+
+        <div class="hp-sidebar-foot">
+          <p class="hp-foot-copy">
+            Desenvolvido com
+            <span class="hp-heart" aria-label="amor">&#10084;&#65039;</span>
+            pela
+            <a href="https://headers.com.br" target="_blank" rel="noopener"
+              >Headers</a
+            >
+            para Coopanest-CE
+          </p>
+          <p class="hp-foot-ver">
+            v{{appVersion}} &middot; Baseado no
+            <a
+              href="https://github.com/alam00000/bentopdf"
+              target="_blank"
+              rel="noopener"
+              >BentoPDF</a
+            >
+            (AGPL-3.0)
+          </p>
+        </div>
+      </aside>
+
+      <div class="hp-scrim" id="hp-scrim"></div>
+
+      <main class="hp-main">
+        <header class="hp-topbar">
+          <button class="hp-menu-btn" id="hp-menu-btn" aria-label="Abrir menu">
+            <i class="ph ph-list"></i>
+          </button>
+          <div class="hp-search-wrap">
+            <i class="ph ph-magnifying-glass hp-search-icon"></i>
+            <input
+              id="hp-search"
+              type="search"
+              autocomplete="off"
+              placeholder="Buscar ferramenta…  (Ctrl + K)"
+              aria-label="Buscar ferramenta"
+            />
+          </div>
+        </header>
+
+        <div class="hp-content">
+          <h1 class="hp-title" id="hp-title">Ferramentas de PDF</h1>
+          <p class="hp-subtitle">
+            Privadas e 100% no seu navegador — nenhum arquivo é enviado a
+            servidores.
+          </p>
+
+          <div class="hp-grid" id="hp-grid"></div>
+          <p class="hp-empty" id="hp-empty" hidden>
+            Nenhuma ferramenta encontrada para a sua busca.
+          </p>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="src/js/utils/lucide-init.ts"></script>
+    <script type="module" src="src/js/home.ts"></script>
+    <script type="module" src="src/js/sw-register.ts"></script>
+  </body>
+</html>

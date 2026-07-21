@@ -1,0 +1,40 @@
+{
+    "name": "Coopanest PDF",
+    "short_name": "Coopanest PDF",
+    "description": "Ferramentas de PDF da Coopanest-CE - privadas e 100% no seu navegador. Baseado no BentoPDF.",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#003142",
+    "theme_color": "#038d4f",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "/images/favicon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/images/favicon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable any"
+        },
+        {
+            "src": "/images/apple-touch-icon.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "categories": [
+        "productivity",
+        "utilities",
+        "privacy",
+        "pdf",
+        "security",
+        "offline",
+        "tools"
+    ],
+    "screenshots": []
+}
