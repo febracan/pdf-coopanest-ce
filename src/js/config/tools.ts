@@ -1,6 +1,35 @@
 // This file centralizes the definition of all available tools, organized by category.
 const baseCategories = [
   {
+    name: 'Favoritos da COOPANEST',
+    tools: [
+      {
+        href: import.meta.env.BASE_URL + 'split-pdf.html',
+        name: 'Split PDF',
+        icon: 'ph-scissors',
+        subtitle: 'Extract a range of pages into a new PDF.',
+      },
+      {
+        href: import.meta.env.BASE_URL + 'compress-pdf.html',
+        name: 'Compress PDF',
+        icon: 'ph-lightning',
+        subtitle: 'Reduce the file size of your PDF.',
+      },
+      {
+        href: import.meta.env.BASE_URL + 'jpg-to-pdf.html',
+        name: 'JPG to PDF',
+        icon: 'ph-file-jpg',
+        subtitle: 'Create a PDF from one or more JPG images.',
+      },
+      {
+        href: import.meta.env.BASE_URL + 'merge-pdf.html',
+        name: 'Merge PDF',
+        icon: 'ph-browsers',
+        subtitle: 'Combine multiple PDFs into one file. Preserves Bookmarks.',
+      },
+    ],
+  },
+  {
     name: 'Popular Tools',
     tools: [
       {

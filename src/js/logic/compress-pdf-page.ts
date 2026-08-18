@@ -182,6 +182,69 @@ async function performPhotonCompression(
   return await newPdfDoc.save();
 }
 
+// Tenta níveis de compressão progressivos até o arquivo ficar abaixo de
+// `targetBytes`. Preserva o texto o quanto possível (tenta Condense antes de
+// cair para o Photon, que rasteriza as páginas).
+async function compressToTarget(
+  file: File,
+  targetBytes: number,
+  convertToGrayscale: boolean
+): Promise<{ blob: Blob; size: number; label: string; fits: boolean } | null> {
+  const ladder = [
+    { alg: 'condense', level: 'balanced', label: 'Condense · Equilibrado' },
+    { alg: 'condense', level: 'aggressive', label: 'Condense · Agressivo' },
+    { alg: 'condense', level: 'extreme', label: 'Condense · Extremo' },
+    { alg: 'photon', level: 'balanced', label: 'Photon · Equilibrado' },
+    { alg: 'photon', level: 'aggressive', label: 'Photon · Agressivo' },
+    { alg: 'photon', level: 'extreme', label: 'Photon · Extremo' },
+  ];
+
+  let best: { blob: Blob; size: number; label: string } | null = null;
+  let cachedAb: ArrayBuffer | null = null;
+
+  for (const step of ladder) {
+    showLoader(`Comprimindo até caber — ${step.label}…`);
+    try {
+      let blob: Blob;
+      let size: number;
+
+      if (step.alg === 'condense') {
+        const result = await performCondenseCompression(
+          file,
+          step.level,
+          convertToGrayscale ? { convertToGrayscale } : undefined
+        );
+        blob = result.blob;
+        size = result.compressedSize;
+      } else {
+        if (!cachedAb) {
+          cachedAb = (await readFileAsArrayBuffer(file)) as ArrayBuffer;
+        }
+        const bytes = await performPhotonCompression(
+          cachedAb.slice(0),
+          step.level
+        );
+        if (!bytes) continue;
+        const buffer = bytes.buffer.slice(
+          bytes.byteOffset,
+          bytes.byteOffset + bytes.byteLength
+        ) as ArrayBuffer;
+        blob = new Blob([buffer], { type: 'application/pdf' });
+        size = bytes.length;
+      }
+
+      if (!best || size < best.size) best = { blob, size, label: step.label };
+      if (size <= targetBytes) {
+        return { blob, size, label: step.label, fits: true };
+      }
+    } catch (err) {
+      console.warn('[CompressToTarget] falha em', step.label, err);
+    }
+  }
+
+  return best ? { ...best, fits: false } : null;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
   const dropZone = document.getElementById('drop-zone');
@@ -236,6 +299,17 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!customSettingsPanel.classList.contains('hidden')) {
         useCustomSettings = true;
       }
+    });
+  }
+
+  // Toggle "comprimir até caber" (tamanho-alvo)
+  const targetSizeEnabled = document.getElementById(
+    'target-size-enabled'
+  ) as HTMLInputElement | null;
+  const targetSizeRow = document.getElementById('target-size-row');
+  if (targetSizeEnabled && targetSizeRow) {
+    targetSizeEnabled.addEventListener('change', () => {
+      targetSizeRow.classList.toggle('hidden', !targetSizeEnabled.checked);
     });
   }
 
@@ -413,6 +487,96 @@ document.addEventListener('DOMContentLoaded', () => {
       ).value;
       if (algorithm === 'condense' && !isPyMuPDFAvailable()) {
         showWasmRequiredDialog('pymupdf');
+        return;
+      }
+
+      // Modo "comprimir até caber" (tamanho-alvo)
+      const targetEnabled =
+        (
+          document.getElementById(
+            'target-size-enabled'
+          ) as HTMLInputElement | null
+        )?.checked ?? false;
+
+      if (targetEnabled) {
+        if (!isPyMuPDFAvailable()) {
+          showWasmRequiredDialog('pymupdf');
+          return;
+        }
+        const rawVal =
+          parseFloat(
+            (document.getElementById('target-size-value') as HTMLInputElement)
+              ?.value || '800'
+          ) || 800;
+        const unit =
+          (document.getElementById('target-size-unit') as HTMLSelectElement)
+            ?.value || 'KB';
+        const targetBytes =
+          Math.max(1, rawVal) * (unit === 'MB' ? 1024 * 1024 : 1024);
+
+        if (state.files.length === 1) {
+          const file = state.files[0];
+          const result = await compressToTarget(
+            file,
+            targetBytes,
+            convertToGrayscale
+          );
+          hideLoader();
+          if (!result) {
+            showAlert('Erro', 'Não foi possível comprimir o arquivo.');
+            return;
+          }
+          downloadFile(result.blob, file.name);
+          if (result.fits) {
+            showAlert(
+              'Comprimido até caber ✓',
+              `Ficou em ${formatBytes(result.size)} (${result.label}), abaixo do limite de ${formatBytes(targetBytes)}.`,
+              'success',
+              () => resetState()
+            );
+          } else {
+            showAlert(
+              'Quase lá',
+              `O menor que consegui foi ${formatBytes(result.size)} (${result.label}), ainda acima de ${formatBytes(targetBytes)}. Dica: divida o PDF em partes (ferramenta Dividir PDF) e comprima cada parte.`,
+              'warning',
+              () => resetState()
+            );
+          }
+          return;
+        }
+
+        // Vários arquivos → cada um comprimido até caber, entregues em .zip
+        const JSZip = (await import('jszip')).default;
+        const zip = new JSZip();
+        let notFit = 0;
+        for (let i = 0; i < state.files.length; i++) {
+          const f = state.files[i];
+          showLoader(
+            `(${i + 1}/${state.files.length}) Comprimindo até caber: ${f.name}…`
+          );
+          const r = await compressToTarget(f, targetBytes, convertToGrayscale);
+          if (!r) continue;
+          zip.file(f.name, await r.blob.arrayBuffer());
+          if (!r.fits) notFit++;
+        }
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        downloadFile(zipBlob, 'comprimidos.zip');
+        hideLoader();
+        if (notFit === 0) {
+          showAlert(
+            'Comprimido até caber ✓',
+            `Todos os ${state.files.length} arquivos ficaram abaixo de ${formatBytes(targetBytes)}.`,
+            'success',
+            () => resetState()
+          );
+        } else {
+          showAlert(
+            'Concluído com avisos',
+            `${notFit} de ${state.files.length} arquivo(s) não couberam em ${formatBytes(targetBytes)} nem no nível máximo. Considere dividi-los na ferramenta Dividir PDF.`,
+            'warning',
+            () => resetState()
+          );
+        }
         return;
       }
 

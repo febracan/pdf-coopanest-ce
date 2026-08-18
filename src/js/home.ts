@@ -13,6 +13,7 @@ const ALL = '__all__';
 
 const categoryIcons: Record<string, string> = {
   __all__: 'ph-squares-four',
+  'Favoritos da COOPANEST': 'ph-heart',
   'Popular Tools': 'ph-star',
   'Edit & Annotate': 'ph-pencil-simple',
   'Convert to PDF': 'ph-tray-arrow-down',
@@ -131,7 +132,11 @@ const render = (): void => {
 
   createIcons({ icons });
 
-  let activeCat = ALL;
+  const FAVORITES = 'Favoritos da COOPANEST';
+  const hasFavorites = !!nav.querySelector(
+    `.hp-nav-item[data-cat="${FAVORITES}"]`
+  );
+  let activeCat = hasFavorites ? FAVORITES : ALL;
 
   const apply = (): void => {
     const term = search.value.toLowerCase().trim();
@@ -169,7 +174,10 @@ const render = (): void => {
       document.getElementById('hp-sidebar')?.classList.remove('is-open');
     });
   });
-  nav.querySelector('.hp-nav-item')?.classList.add('is-active');
+  const initialNavItem =
+    nav.querySelector(`.hp-nav-item[data-cat="${activeCat}"]`) ||
+    nav.querySelector('.hp-nav-item');
+  initialNavItem?.classList.add('is-active');
 
   search.addEventListener('input', apply);
 

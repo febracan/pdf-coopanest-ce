@@ -5,8 +5,10 @@ import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import {
   renderPagesProgressively,
   cleanupLazyRendering,
+  renderPageToCanvas,
 } from '../utils/render-utils.js';
 import { initPagePreview } from '../utils/page-preview.js';
+import { showFilePreview } from '../utils/file-preview.js';
 import { isCpdfAvailable } from '../utils/cpdf-helper.js';
 import {
   showWasmRequiredDialog,
@@ -52,6 +54,40 @@ const mergeWorker = new Worker(
   import.meta.env.BASE_URL + 'workers/merge.worker.js'
 );
 
+let fileThumbObserver: IntersectionObserver | null = null;
+
+function createFileThumbObserver(): IntersectionObserver {
+  if (fileThumbObserver) fileThumbObserver.disconnect();
+
+  fileThumbObserver = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const thumb = entry.target as HTMLElement;
+        obs.unobserve(thumb);
+
+        const key = thumb.dataset.key;
+        const doc = key ? mergeState.pdfDocs[key] : undefined;
+        if (!doc) return;
+
+        renderPageToCanvas(doc, 1, 0.5)
+          .then((canvas) => {
+            canvas.className = 'w-full h-full object-contain';
+            const badge = thumb.querySelector('.thumb-badge');
+            thumb.textContent = '';
+            thumb.appendChild(canvas);
+            if (badge) thumb.appendChild(badge);
+          })
+          .catch((err) =>
+            console.error('Erro ao renderizar a miniatura do arquivo:', err)
+          );
+      });
+    },
+    { root: null, rootMargin: '300px', threshold: 0.01 }
+  );
+  return fileThumbObserver;
+}
+
 function initializeFileListSortable() {
   const fileList = document.getElementById('file-list');
   if (!fileList) return;
@@ -61,8 +97,9 @@ function initializeFileListSortable() {
   }
 
   mergeState.sortableInstances.fileList = Sortable.create(fileList, {
-    handle: '.drag-handle',
     animation: 150,
+    draggable: '.merge-file-card',
+    filter: '.no-drag',
     ghostClass: 'sortable-ghost',
     chosenClass: 'sortable-chosen',
     dragClass: 'sortable-drag',
@@ -71,6 +108,8 @@ function initializeFileListSortable() {
     },
     onEnd: function (evt: Sortable.SortableEvent) {
       evt.item.style.opacity = '1';
+      const addTile = fileList.querySelector('.add-tile');
+      if (addTile) fileList.appendChild(addTile);
     },
   });
 }
@@ -230,14 +269,17 @@ async function renderPageMergeThumbnails() {
 const updateUI = async () => {
   const fileControls = document.getElementById('file-controls');
   const mergeOptions = document.getElementById('merge-options');
+  const dropZone = document.getElementById('drop-zone');
 
   if (state.files.length > 0) {
     if (fileControls) fileControls.classList.remove('hidden');
     if (mergeOptions) mergeOptions.classList.remove('hidden');
+    if (dropZone) dropZone.classList.add('hidden');
     await refreshMergeUI();
   } else {
     if (fileControls) fileControls.classList.add('hidden');
     if (mergeOptions) mergeOptions.classList.add('hidden');
+    if (dropZone) dropZone.classList.remove('hidden');
     // Clear file list UI
     const fileList = document.getElementById('file-list');
     if (fileList) fileList.innerHTML = '';
@@ -254,6 +296,11 @@ const resetState = async () => {
   mergeState.cachedThumbnails = null;
   mergeState.lastFileHash = null;
   mergeState.mergeSuccess = false;
+
+  if (fileThumbObserver) {
+    fileThumbObserver.disconnect();
+    fileThumbObserver = null;
+  }
 
   const fileList = document.getElementById('file-list');
   if (fileList) fileList.innerHTML = '';
@@ -487,67 +534,87 @@ export async function refreshMergeUI() {
     return;
 
   fileList.textContent = ''; // Clear list safely
+  const thumbObserver = createFileThumbObserver();
+
   (state.files as File[]).forEach((f, index) => {
     const fileKey = `${index}_${f.name}`;
     const doc = mergeState.pdfDocs[fileKey];
-    const pageCount = doc ? doc.numPages : 'N/A';
-    const safeFileName = fileKey.replace(/[^a-zA-Z0-9]/g, '_');
+    const pageCount = doc ? doc.numPages : 0;
 
-    const li = document.createElement('li');
-    li.className =
-      'bg-gray-700 p-3 rounded-lg border border-gray-600 hover:border-indigo-500 transition-colors';
-    li.dataset.fileName = fileKey;
-
-    const mainDiv = document.createElement('div');
-    mainDiv.className = 'flex items-center justify-between';
-
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'truncate font-medium text-white flex-1 mr-2';
-    nameSpan.title = f.name;
-    nameSpan.textContent = f.name;
-
-    const dragHandle = document.createElement('div');
-    dragHandle.className =
-      'drag-handle cursor-move text-gray-400 hover:text-white p-1 rounded transition-colors';
-    dragHandle.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="19" r="1"/></svg>`; // Safe: static content
-
-    mainDiv.append(nameSpan, dragHandle);
-
-    const rangeDiv = document.createElement('div');
-    rangeDiv.className = 'mt-2 flex items-center gap-2';
-
-    const inputWrapper = document.createElement('div');
-    inputWrapper.className = 'flex-1';
-
-    const label = document.createElement('label');
-    label.htmlFor = `range-${safeFileName}`;
-    label.className = 'text-xs text-gray-400';
-    label.textContent = `Páginas (ex.: 1-3, 5) - Total: ${pageCount}`;
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.id = `range-${safeFileName}`;
-    input.className =
-      'w-full bg-gray-800 border border-gray-600 text-white rounded-md p-2 text-sm mt-1 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-colors';
-    input.placeholder = 'Deixe em branco para todas as páginas';
-
-    inputWrapper.append(label, input);
+    const card = document.createElement('li');
+    card.className =
+      'merge-file-card group relative flex flex-col gap-2 p-2 border-2 border-gray-600 hover:border-indigo-500 rounded-lg bg-gray-700 transition-colors cursor-move select-none';
+    card.dataset.fileName = fileKey;
 
     const deleteBtn = document.createElement('button');
     deleteBtn.className =
-      'text-red-400 hover:text-red-300 p-2 flex-shrink-0 self-end';
-    deleteBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
+      'no-drag absolute top-1 right-1 z-10 bg-gray-900/80 hover:bg-red-600 text-white/80 hover:text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-colors';
     deleteBtn.title = 'Remover arquivo';
-    deleteBtn.onclick = (e) => {
+    deleteBtn.innerHTML =
+      '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+    deleteBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       state.files = state.files.filter((_, i) => i !== index);
       updateUI();
-    };
+    });
 
-    rangeDiv.append(inputWrapper, deleteBtn);
-    li.append(mainDiv, rangeDiv);
-    fileList.appendChild(li);
+    const thumb = document.createElement('div');
+    thumb.className =
+      'thumb relative rounded-md overflow-hidden bg-gray-800 flex items-center justify-center w-full';
+    thumb.style.aspectRatio = '3 / 4';
+    thumb.dataset.key = fileKey;
+
+    const skeleton = document.createElement('span');
+    skeleton.className = 'text-gray-500 text-xs animate-pulse';
+    skeleton.textContent = 'Carregando…';
+    thumb.appendChild(skeleton);
+
+    if (doc) {
+      const badge = document.createElement('span');
+      badge.className =
+        'thumb-badge absolute bottom-1 left-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-semibold shadow';
+      badge.textContent = pageCount === 1 ? '1 página' : `${pageCount} páginas`;
+      thumb.appendChild(badge);
+
+      card.title = 'Arraste para reordenar · dois cliques para pré-visualizar';
+      // Detecção manual de duplo-clique: o SortableJS suprime o evento
+      // "dblclick" nativo do item arrastável, então contamos os cliques.
+      let lastCardClick = 0;
+      card.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastCardClick < 350) {
+          lastCardClick = 0;
+          showFilePreview(doc, f.name);
+        } else {
+          lastCardClick = now;
+        }
+      });
+      thumbObserver.observe(thumb);
+    }
+
+    const nameEl = document.createElement('p');
+    nameEl.className = 'text-xs text-gray-300 truncate w-full text-center';
+    nameEl.title = f.name;
+    nameEl.textContent = f.name;
+
+    card.append(deleteBtn, thumb, nameEl);
+    fileList.appendChild(card);
   });
+
+  const addTile = document.createElement('li');
+  addTile.className =
+    'add-tile flex flex-col items-center justify-center gap-1 min-h-[8rem] p-2 border-2 border-dashed border-gray-600 hover:border-indigo-500 rounded-lg bg-gray-800/40 text-gray-400 hover:text-indigo-400 cursor-pointer transition-colors';
+  addTile.title = 'Adicionar mais arquivos';
+  addTile.innerHTML =
+    '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg><span class="text-xs">Adicionar</span>';
+  addTile.addEventListener('click', () => {
+    const fi = document.getElementById('file-input') as HTMLInputElement | null;
+    if (fi) {
+      fi.value = '';
+      fi.click();
+    }
+  });
+  fileList.appendChild(addTile);
 
   createIcons({ icons });
   initializeFileListSortable();
@@ -623,7 +690,10 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.addEventListener('change', async (e) => {
       const files = (e.target as HTMLInputElement).files;
       if (files && files.length > 0) {
-        state.files = [...state.files, ...Array.from(files)];
+        // O seletor de arquivos do Windows devolve a seleção múltipla na
+        // ordem inversa à dos cliques; invertemos para respeitar a sequência
+        // em que o usuário escolheu os arquivos.
+        state.files = [...state.files, ...Array.from(files).reverse()];
         await updateUI();
       }
     });

@@ -36,6 +36,132 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url
 ).toString();
 
+interface SplitPiece {
+  filename: string;
+  blob: Blob;
+  pages: number;
+  size: number;
+}
+
+let splitResultPieces: SplitPiece[] = [];
+
+// Nome de arquivo e nº de páginas descritivos a partir dos índices (0-based).
+function pieceMeta(indices: number[]): { filename: string; pages: number } {
+  const pages = [...indices].sort((a, b) => a - b).map((i) => i + 1);
+  const start = pages[0];
+  const end = pages[pages.length - 1];
+  const contiguous = end - start + 1 === pages.length;
+  if (pages.length === 1) {
+    return { filename: `pagina_${start}.pdf`, pages: 1 };
+  }
+  if (contiguous) {
+    return { filename: `paginas_${start}-${end}.pdf`, pages: pages.length };
+  }
+  return { filename: `paginas_selecionadas_${start}.pdf`, pages: pages.length };
+}
+
+async function downloadAllSplitPieces(): Promise<void> {
+  const zip = new JSZip();
+  for (const p of splitResultPieces) {
+    zip.file(p.filename, await p.blob.arrayBuffer());
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  downloadFile(blob, 'paginas-divididas.zip');
+}
+
+// Painel de resultados: mostra cada pedaço com nº de páginas + tamanho e
+// permite baixar cada um separadamente (ou todos em .zip).
+function renderSplitResults(): void {
+  const el = document.getElementById('split-results');
+  if (!el) return;
+  el.innerHTML = '';
+
+  if (splitResultPieces.length === 0) {
+    el.classList.add('hidden');
+    return;
+  }
+  el.classList.remove('hidden');
+
+  const header = document.createElement('div');
+  header.className = 'flex items-center justify-between mb-3';
+  const title = document.createElement('p');
+  title.className = 'text-sm font-semibold text-white';
+  title.textContent = `${splitResultPieces.length} arquivo(s) gerado(s)`;
+  header.appendChild(title);
+  if (splitResultPieces.length > 1) {
+    const dlAll = document.createElement('button');
+    dlAll.className =
+      'text-indigo-400 hover:text-indigo-300 text-xs font-semibold';
+    dlAll.textContent = 'Baixar todos (.zip)';
+    dlAll.addEventListener('click', () => void downloadAllSplitPieces());
+    header.appendChild(dlAll);
+  }
+  el.appendChild(header);
+
+  const list = document.createElement('div');
+  list.className = 'space-y-2';
+  for (const p of splitResultPieces) {
+    const row = document.createElement('div');
+    row.className =
+      'flex items-center justify-between gap-3 bg-gray-700 p-3 rounded-lg text-sm';
+
+    const info = document.createElement('div');
+    info.className = 'flex flex-col overflow-hidden';
+    const nameEl = document.createElement('span');
+    nameEl.className = 'truncate text-gray-200 font-medium';
+    nameEl.textContent = p.filename;
+    const metaEl = document.createElement('span');
+    metaEl.className = 'text-xs text-gray-400';
+    metaEl.textContent = `${p.pages} página(s) · ${formatBytes(p.size)}`;
+    info.append(nameEl, metaEl);
+
+    const dl = document.createElement('button');
+    dl.className =
+      'text-indigo-400 hover:text-indigo-300 text-xs font-semibold flex-shrink-0';
+    dl.textContent = 'Baixar';
+    dl.addEventListener('click', () => downloadFile(p.blob, p.filename));
+
+    row.append(info, dl);
+    list.appendChild(row);
+  }
+  el.appendChild(list);
+}
+
+// Extrai cada grupo, dá nome descritivo, baixa (arquivo único ou .zip) e
+// popula o painel de resultados.
+async function finalizeSplitPieces(
+  groups: number[][],
+  zipName: string,
+  extractPages: (indices: number[]) => Promise<Uint8Array>
+): Promise<void> {
+  splitResultPieces = [];
+  const usedNames = new Map<string, number>();
+
+  for (const group of groups) {
+    const bytes = await extractPages(group);
+    const meta = pieceMeta(group);
+    const filename = uniqueZipName(meta.filename, usedNames);
+    const blob = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+    splitResultPieces.push({
+      filename,
+      blob,
+      pages: meta.pages,
+      size: bytes.length,
+    });
+  }
+
+  if (splitResultPieces.length === 1) {
+    downloadFile(splitResultPieces[0].blob, splitResultPieces[0].filename);
+  } else {
+    const zip = new JSZip();
+    for (const p of splitResultPieces) zip.file(p.filename, p.blob);
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    downloadFile(zipBlob, zipName);
+  }
+
+  renderSplitResults();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   let visualSelectorRendered = false;
   let isSplitting = false;
@@ -131,6 +257,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (fileDisplayArea) fileDisplayArea.innerHTML = '';
       if (splitOptions) splitOptions.classList.add('hidden');
       state.pdfDoc = null;
+      splitResultPieces = [];
+      renderSplitResults();
     }
   };
 
@@ -297,6 +425,9 @@ document.addEventListener('DOMContentLoaded', () => {
     isSplitting = true;
     if (processBtn) (processBtn as HTMLButtonElement).disabled = true;
 
+    splitResultPieces = [];
+    renderSplitResults();
+
     const splitMode = splitModeSelect.value;
     const oneFilePerUnit =
       (
@@ -412,20 +543,18 @@ document.addEventListener('DOMContentLoaded', () => {
             throw new Error('Nenhum marcador encontrado no nível selecionado.');
           }
 
-          const zip = new JSZip();
           const bookmarkGroups = bookmarkSplitGroups(splitPages, totalPages);
-
-          for (let i = 0; i < bookmarkGroups.length; i++) {
-            const pdfBytes2 = await extractPages(bookmarkGroups[i]);
-            zip.file(`split-${i + 1}.pdf`, pdfBytes2);
-          }
-
-          const zipBlob = await zip.generateAsync({ type: 'blob' });
-          downloadFile(zipBlob, 'split-by-bookmarks.zip');
+          await finalizeSplitPieces(
+            bookmarkGroups,
+            'dividido-por-marcadores.zip',
+            extractPages
+          );
           hideLoader();
-          showAlert('Sucesso', 'PDF dividido com sucesso!', 'success', () => {
-            resetState();
-          });
+          showAlert(
+            'PDF dividido ✓',
+            `Gerados ${bookmarkGroups.length} arquivo(s). Veja abaixo as páginas e o tamanho de cada um.`,
+            'success'
+          );
           return;
         }
 
@@ -436,20 +565,18 @@ document.addEventListener('DOMContentLoaded', () => {
           );
           if (nValue < 1) throw new Error('N deve ser no mínimo 1.');
 
-          const zip2 = new JSZip();
           const chunks = nTimesGroups(nValue, totalPages);
-
-          for (let i = 0; i < chunks.length; i++) {
-            const pdfBytes3 = await extractPages(chunks[i]);
-            zip2.file(`split-${i + 1}.pdf`, pdfBytes3);
-          }
-
-          const zipBlob2 = await zip2.generateAsync({ type: 'blob' });
-          downloadFile(zipBlob2, 'split-n-times.zip');
+          await finalizeSplitPieces(
+            chunks,
+            'paginas-divididas.zip',
+            extractPages
+          );
           hideLoader();
-          showAlert('Sucesso', 'PDF dividido com sucesso!', 'success', () => {
-            resetState();
-          });
+          showAlert(
+            'PDF dividido ✓',
+            `Gerados ${chunks.length} arquivo(s). Veja abaixo as páginas e o tamanho de cada um — dá para baixar tudo ou cada parte separadamente.`,
+            'success'
+          );
           return;
         }
       }
@@ -463,39 +590,30 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error('Nenhuma página foi selecionada para divisão.');
       }
 
-      if (outputGroups && outputGroups.length > 0) {
-        if (outputGroups.length === 1) {
-          const pdfBytes = await extractPages(outputGroups[0]);
-          downloadFile(
-            new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-            groupFilename(outputGroups[0])
-          );
-        } else {
-          showLoader('Criando arquivo ZIP...');
-          const zip = new JSZip();
-          const usedNames = new Map<string, number>();
-          for (const group of outputGroups) {
-            const pdfBytes = await extractPages(group);
-            zip.file(uniqueZipName(groupFilename(group), usedNames), pdfBytes);
-          }
-          const zipBlob = await zip.generateAsync({ type: 'blob' });
-          downloadFile(zipBlob, 'split-pages.zip');
-        }
-      } else {
-        const pdfBytes = await extractPages(uniqueIndices);
-        downloadFile(
-          new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-          'split-document.pdf'
-        );
+      const finalGroups =
+        outputGroups && outputGroups.length > 0
+          ? outputGroups
+          : [uniqueIndices];
+
+      if (outputGroups && outputGroups.length > 1) {
+        showLoader('Criando arquivos...');
       }
+      await finalizeSplitPieces(
+        finalGroups,
+        'paginas-divididas.zip',
+        extractPages
+      );
 
       if (splitMode === 'visual') {
         visualSelectorRendered = false;
       }
 
-      showAlert('Sucesso', 'PDF dividido com sucesso!', 'success', () => {
-        resetState();
-      });
+      hideLoader();
+      showAlert(
+        'PDF dividido ✓',
+        `Divisão concluída (${finalGroups.length} arquivo(s)). Veja abaixo as páginas e o tamanho de cada um.`,
+        'success'
+      );
     } catch (e: unknown) {
       console.error(e);
       showAlert(
