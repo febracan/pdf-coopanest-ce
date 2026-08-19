@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 import { createIcons, icons } from 'lucide';
 import heic2any from 'heic2any';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
@@ -91,7 +92,7 @@ async function convert() {
     const pdfBytes = await pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-      'from_heic.pdf'
+      withPdfSuffix(files[0]?.name || 'documento', 'convertido')
     );
     showAlert('Sucesso', 'PDF criado com sucesso!', 'success', () => {
       resetState();

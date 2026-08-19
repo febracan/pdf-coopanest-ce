@@ -6,6 +6,7 @@ import {
   getLibreOfficeConverter,
   type LoadProgress,
 } from '../utils/libreoffice-loader.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   state.files = [];
@@ -105,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pdfBlob = await converter.convertToPdf(originalFile);
 
-        const fileName = originalFile.name.replace(/\.odt$/i, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
 
         downloadFile(pdfBlob, fileName);
 
@@ -130,14 +131,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const pdfBlob = await converter.convertToPdf(file);
 
-          const baseName = file.name.replace(/\.odt$/i, '');
+          const entryName = withPdfSuffix(file.name, 'convertido');
           const pdfBuffer = await pdfBlob.arrayBuffer();
-          zip.file(`${baseName}.pdf`, pdfBuffer);
+          zip.file(entryName, pdfBuffer);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-        downloadFile(zipBlob, 'odt-converted.zip');
+        downloadFile(zipBlob, withZipSuffix(state.files[0].name, 'convertido'));
 
         hideLoader();
 

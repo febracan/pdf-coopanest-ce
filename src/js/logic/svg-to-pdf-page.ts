@@ -1,6 +1,7 @@
 import { createIcons, icons } from 'lucide';
 import { showAlert, showLoader, hideLoader } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import {
   getSelectedQuality,
@@ -252,7 +253,7 @@ async function convertToPdf() {
     const pdfBytes = await pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-      'from_svgs.pdf'
+      withPdfSuffix(files[0]?.name || 'from_svgs.pdf', 'convertido')
     );
     showAlert('Sucesso', 'PDF criado com sucesso!', 'success', () => {
       resetState();

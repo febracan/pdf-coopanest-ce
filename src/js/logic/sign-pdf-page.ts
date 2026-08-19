@@ -9,6 +9,7 @@ import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { t } from '../i18n/i18n';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
 import { flattenAnnotations } from '../utils/flatten-annotations.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import type { SignState, PDFViewerWindow } from '@/types';
 
 const signState: SignState = {
@@ -309,7 +310,10 @@ async function applyAndSaveSignatures() {
       const blob = new Blob([new Uint8Array(flattenedPdfBytes)], {
         type: 'application/pdf',
       });
-      downloadFile(blob, signState.file?.name || 'document.pdf');
+      downloadFile(
+        blob,
+        withPdfSuffix(signState.file?.name || 'document.pdf', 'assinado')
+      );
 
       hideLoader();
       showAlert('Sucesso', 'PDF assinado salvo com sucesso!', 'success', () => {

@@ -5,6 +5,7 @@ import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { AddBlankPageState } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const pageState: AddBlankPageState = {
   file: null,
@@ -177,7 +178,7 @@ async function addBlankPages() {
     const newPdfBytes = await newPdf.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'pagina_em_branco')
     );
 
     showAlert(

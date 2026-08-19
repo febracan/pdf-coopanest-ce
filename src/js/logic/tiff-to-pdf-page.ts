@@ -8,6 +8,7 @@ import { createIcons, icons } from 'lucide';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { decode } from 'tiff';
 import { tiffIfdToRgba } from '../utils/tiff-utils.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 let files: File[] = [];
 
@@ -143,7 +144,7 @@ async function convert() {
     const pdfBytes = await pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-      'from_tiff.pdf'
+      withPdfSuffix(files[0]?.name || 'documento', 'convertido')
     );
     showAlert('Sucesso', 'PDF criado com sucesso!', 'success', () => {
       resetState();

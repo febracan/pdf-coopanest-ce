@@ -8,6 +8,7 @@ import {
   compressImageFile,
 } from '../utils/image-compress.js';
 import { showImagePreview } from '../utils/image-preview.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 import Sortable from 'sortablejs';
 
 const SUPPORTED_FORMATS = '.jpg,.jpeg,.jp2,.jpx';
@@ -17,6 +18,7 @@ let files: File[] = [];
 let pymupdf: PyMuPDFInstance | null = null;
 let gridSortable: Sortable | null = null;
 const objectUrls = new Map<File, string>();
+const rotations = new Map<File, number>();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initializePage);
@@ -132,13 +134,65 @@ function pruneObjectUrls() {
     if (!files.includes(file)) {
       URL.revokeObjectURL(url);
       objectUrls.delete(file);
+      rotations.delete(file);
     }
   }
+}
+
+// Desenha a imagem girada `deg` graus num canvas (com escala opcional).
+async function renderRotated(
+  file: File,
+  deg: number,
+  maxDim: number
+): Promise<HTMLCanvasElement> {
+  const bmp = await createImageBitmap(file);
+  const rot = ((deg % 360) + 360) % 360;
+  let w = bmp.width;
+  let h = bmp.height;
+  if (maxDim && Math.max(w, h) > maxDim) {
+    const s = maxDim / Math.max(w, h);
+    w = Math.round(w * s);
+    h = Math.round(h * s);
+  }
+  const swap = rot === 90 || rot === 270;
+  const canvas = document.createElement('canvas');
+  canvas.width = swap ? h : w;
+  canvas.height = swap ? w : h;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rot * Math.PI) / 180);
+    ctx.drawImage(bmp, -w / 2, -h / 2, w, h);
+  }
+  if ('close' in bmp) bmp.close();
+  return canvas;
+}
+
+// Coloca (ou substitui) a miniatura do card conforme a rotação atual.
+async function setThumbImage(thumb: HTMLElement, file: File): Promise<void> {
+  const deg = rotations.get(file) || 0;
+  let el: HTMLElement;
+  if (deg % 360 === 0) {
+    const img = document.createElement('img');
+    img.src = urlFor(file);
+    img.alt = file.name;
+    img.draggable = false;
+    img.className = 'thumb-img w-full h-full object-contain';
+    el = img;
+  } else {
+    const canvas = await renderRotated(file, deg, 480);
+    canvas.className = 'thumb-img w-full h-full object-contain';
+    el = canvas;
+  }
+  const old = thumb.querySelector('.thumb-img');
+  if (old) old.replaceWith(el);
+  else thumb.insertBefore(el, thumb.firstChild);
 }
 
 const resetState = () => {
   for (const url of objectUrls.values()) URL.revokeObjectURL(url);
   objectUrls.clear();
+  rotations.clear();
   files = [];
   updateUI();
 };
@@ -214,23 +268,30 @@ function updateUI() {
       updateUI();
     });
 
+    const rotateBtn = document.createElement('button');
+    rotateBtn.className =
+      'no-drag absolute top-1 left-1 z-10 bg-gray-900/80 hover:bg-indigo-600 text-white/80 hover:text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-colors';
+    rotateBtn.title = 'Girar 90°';
+    rotateBtn.innerHTML =
+      '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006 5.3M4 15a8 8 0 0014 3.7"/></svg>';
+
     const thumb = document.createElement('div');
     thumb.className =
       'thumb relative rounded-md overflow-hidden bg-gray-800 flex items-center justify-center w-full';
     thumb.style.aspectRatio = '3 / 4';
-
-    const img = document.createElement('img');
-    img.src = urlFor(file);
-    img.alt = file.name;
-    img.draggable = false;
-    img.className = 'w-full h-full object-contain';
-    thumb.appendChild(img);
 
     const badge = document.createElement('span');
     badge.className =
       'absolute bottom-1 left-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-semibold shadow';
     badge.textContent = formatBytes(file.size);
     thumb.appendChild(badge);
+    void setThumbImage(thumb, file);
+
+    rotateBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      rotations.set(file, ((rotations.get(file) || 0) + 90) % 360);
+      void setThumbImage(thumb, file);
+    });
 
     // Detecção manual de duplo-clique (o SortableJS suprime o "dblclick"
     // nativo do item arrastável).
@@ -240,7 +301,16 @@ function updateUI() {
       const now = Date.now();
       if (now - lastCardClick < 350) {
         lastCardClick = 0;
-        showImagePreview(urlFor(file), file.name);
+        const deg = rotations.get(file) || 0;
+        if (deg % 360 === 0) {
+          showImagePreview(urlFor(file), file.name);
+        } else {
+          renderRotated(file, deg, 2000)
+            .then((c) =>
+              showImagePreview(c.toDataURL('image/jpeg', 0.92), file.name)
+            )
+            .catch(() => {});
+        }
       } else {
         lastCardClick = now;
       }
@@ -251,7 +321,7 @@ function updateUI() {
     nameEl.title = file.name;
     nameEl.textContent = file.name;
 
-    card.append(deleteBtn, thumb, nameEl);
+    card.append(deleteBtn, rotateBtn, thumb, nameEl);
     fileDisplayArea.appendChild(card);
   });
 
@@ -299,12 +369,25 @@ async function convertToPdf() {
     const quality = getSelectedQuality();
     const compressedFiles: File[] = [];
     for (const file of files) {
-      compressedFiles.push(await compressImageFile(file, quality));
+      const deg = rotations.get(file) || 0;
+      let src = file;
+      if (deg % 360 !== 0) {
+        try {
+          const canvas = await renderRotated(file, deg, 0);
+          const rotatedBlob = await new Promise<Blob>((res) =>
+            canvas.toBlob((b) => res(b as Blob), 'image/jpeg', 0.95)
+          );
+          src = new File([rotatedBlob], file.name, { type: 'image/jpeg' });
+        } catch (err) {
+          console.warn('Rotação não suportada para', file.name, err);
+        }
+      }
+      compressedFiles.push(await compressImageFile(src, quality));
     }
 
     const pdfBlob = await mupdf.imagesToPdf(compressedFiles);
 
-    downloadFile(pdfBlob, 'from_jpgs.pdf');
+    downloadFile(pdfBlob, withPdfSuffix(files[0].name, 'convertido'));
 
     showAlert('Sucesso', 'PDF criado com sucesso!', 'success', () => {
       resetState();

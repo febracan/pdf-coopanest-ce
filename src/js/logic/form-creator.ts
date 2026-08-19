@@ -22,6 +22,7 @@ type LucideWindow = Window & {
 import DOMPurify from 'dompurify';
 import { initializeGlobalShortcuts } from '../utils/shortcuts-init.js';
 import { downloadFile, escapeHtml, hexToRgb } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { createIcons, icons } from 'lucide';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -2705,7 +2706,10 @@ downloadBtn.addEventListener('click', async () => {
     const blob = new Blob([new Uint8Array(pdfBytes)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, uploadedFileName || 'document.pdf');
+    downloadFile(
+      blob,
+      withPdfSuffix(uploadedFileName || 'document.pdf', 'formulario')
+    );
     showModal(
       'Sucesso',
       'Seu PDF foi baixado com sucesso.',

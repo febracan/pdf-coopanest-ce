@@ -5,6 +5,7 @@ import { formatBytes, downloadFile } from '../utils/helpers.js';
 import { makeUniqueFileKey } from '../utils/deduplicate-filename.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { getEditorDisabledCategories } from '../utils/disabled-tools.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 const embedPdfWasmUrl = new URL(
   'embedpdf-snippet/dist/pdfium.wasm',
@@ -144,7 +145,7 @@ async function handleFiles(files: FileList) {
         worker: true,
         wasmUrl: embedPdfWasmUrl,
         export: {
-          defaultFileName: firstFile.name,
+          defaultFileName: withPdfSuffix(firstFile.name, 'editado'),
         },
         documentManager: {
           maxDocuments: 10,
@@ -219,7 +220,7 @@ async function handleFiles(files: FileList) {
           const exportPlugin = registry.getPlugin('export').provides();
           const arrayBuffer = await exportPlugin.saveAsCopy().toPromise();
           const blob = new Blob([arrayBuffer], { type: 'application/pdf' });
-          downloadFile(blob, currentFileName);
+          downloadFile(blob, withPdfSuffix(currentFileName, 'editado'));
         } catch (err) {
           console.error('Error downloading PDF:', err);
           showAlert('Erro', 'Falha ao baixar o PDF editado.');

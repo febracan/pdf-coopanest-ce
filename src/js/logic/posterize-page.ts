@@ -5,6 +5,7 @@ import {
   formatBytes,
 } from '../utils/helpers.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { PDFDocument, PageSizes } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
 import { createIcons, icons } from 'lucide';
@@ -310,7 +311,7 @@ async function posterize() {
     const newPdfBytes = await newDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'poster')
     );
 
     showAlert('Sucesso', 'Seu PDF foi transformado em pôster.');

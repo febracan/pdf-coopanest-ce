@@ -10,6 +10,7 @@ import {
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 interface LayerData {
   number: number;
@@ -426,7 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const blob = new Blob([new Uint8Array(pdfBytes)], {
             type: 'application/pdf',
           });
-          downloadFile(blob, currentFile!.name);
+          downloadFile(blob, withPdfSuffix(currentFile!.name, 'camadas'));
           hideLoader();
           resetState();
           showAlert(

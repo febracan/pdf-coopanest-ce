@@ -13,6 +13,7 @@ import type { PyMuPDFInstance } from '@/types';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
 import { showWasmRequiredDialog } from '../utils/wasm-provider.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -146,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         );
 
-        downloadFile(rasterizedBlob, file.name);
+        downloadFile(rasterizedBlob, withPdfSuffix(file.name, 'rasterizado'));
 
         hideLoader();
         showAlert(
@@ -176,7 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
               quality: 95,
             });
 
-            const zipEntryName = deduplicateFileName(file.name, usedNames);
+            const zipEntryName = deduplicateFileName(
+              withPdfSuffix(file.name, 'rasterizado'),
+              usedNames
+            );
             zip.file(zipEntryName, rasterizedBlob);
 
             completed++;
@@ -192,7 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoader('Criando arquivo ZIP...');
         const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-        downloadFile(zipBlob, 'rasterized-pdfs.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(
+            state.files[0]?.name || 'rasterized-pdfs',
+            'rasterizado'
+          )
+        );
 
         hideLoader();
 

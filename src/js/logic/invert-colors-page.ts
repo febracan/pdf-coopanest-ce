@@ -7,6 +7,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { InvertColorsState } from '@/types';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -164,7 +165,7 @@ async function invertColors() {
     const newPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'cores_invertidas')
     );
     showAlert('Sucesso', 'Cores invertidas com sucesso!', 'success', () => {
       resetState();

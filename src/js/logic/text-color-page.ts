@@ -12,6 +12,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { TextColorState } from '@/types';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -186,7 +187,7 @@ async function changeTextColor() {
     const newPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'cor_texto')
     );
     showAlert(
       'Sucesso',

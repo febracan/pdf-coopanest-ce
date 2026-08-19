@@ -5,6 +5,7 @@ import {
   readFileAsArrayBuffer,
 } from '../utils/helpers.js';
 import { decryptPdfBytes } from '../utils/pdf-decrypt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { icons, createIcons } from 'lucide';
 import JSZip from 'jszip';
 import { DecryptPdfState } from '@/types';
@@ -137,7 +138,7 @@ async function decryptPdf() {
       const blob = new Blob([decryptedBytes.slice().buffer], {
         type: 'application/pdf',
       });
-      downloadFile(blob, file.name);
+      downloadFile(blob, withPdfSuffix(file.name, 'desprotegido'));
 
       if (loaderModal) loaderModal.classList.add('hidden');
       showAlert(
@@ -168,7 +169,9 @@ async function decryptPdf() {
             password
           );
 
-          zip.file(file.name, decryptedBytes, { binary: true });
+          zip.file(withPdfSuffix(file.name, 'desprotegido'), decryptedBytes, {
+            binary: true,
+          });
           successCount++;
         } catch (fileError: unknown) {
           errorCount++;
@@ -184,7 +187,10 @@ async function decryptPdf() {
 
       if (loaderText) loaderText.textContent = 'Gerando arquivo ZIP...';
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadFile(zipBlob, 'decrypted-pdfs.zip');
+      downloadFile(
+        zipBlob,
+        withZipSuffix(pageState.files[0]?.name || 'documento', 'desprotegido')
+      );
 
       let alertMessage = `${successCount} PDF(s) descriptografado(s) com sucesso.`;
       if (errorCount > 0) {

@@ -3,6 +3,7 @@ import { downloadFile, formatBytes } from '../utils/helpers.js';
 import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 import type { PyMuPDFInstance } from '@/types';
 
 const ACCEPTED_EXTENSIONS = ['.psd'];
@@ -93,8 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = state.files[0];
         showLoader(`Convertendo ${file.name}...`);
         const pdfBlob = await mupdf.imageToPdf(file, { imageType: 'psd' });
-        const baseName = file.name.replace(/\.[^/.]+$/, '');
-        downloadFile(pdfBlob, `${baseName}.pdf`);
+        downloadFile(pdfBlob, withPdfSuffix(file.name, 'convertido'));
         hideLoader();
         showAlert(
           'Conversão concluída',
@@ -105,7 +105,10 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         showLoader('Convertendo vários arquivos...');
         const pdfBlob = await mupdf.imagesToPdf(state.files);
-        downloadFile(pdfBlob, 'psd_to_pdf.pdf');
+        downloadFile(
+          pdfBlob,
+          withPdfSuffix(state.files[0]?.name || 'psd_to_pdf', 'convertido')
+        );
         hideLoader();
         showAlert(
           'Conversão concluída',

@@ -6,6 +6,7 @@ import {
   readFileAsArrayBuffer,
 } from '../utils/helpers.js';
 import { icons, createIcons } from 'lucide';
+import { withPdfSuffix } from '../utils/output-name.js';
 import { EncryptPdfState, QpdfInstanceExtended } from '@/types';
 
 const pageState: EncryptPdfState = {
@@ -175,7 +176,10 @@ async function encryptPdf() {
     const blob = new Blob([new Uint8Array(outputFile)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, pageState.file.name);
+    downloadFile(
+      blob,
+      withPdfSuffix(pageState.file?.name || 'documento.pdf', 'protegido')
+    );
 
     if (loaderModal) loaderModal.classList.add('hidden');
 

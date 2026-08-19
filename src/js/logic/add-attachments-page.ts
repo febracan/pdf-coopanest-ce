@@ -9,6 +9,7 @@ import {
 } from '../utils/wasm-provider.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const worker = new Worker(
   import.meta.env.BASE_URL + 'workers/add-attachments.worker.js'
@@ -67,7 +68,7 @@ worker.onmessage = function (e) {
 
     downloadFile(
       new Blob([new Uint8Array(data.modifiedPDF)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'anexos')
     );
 
     showAlert(

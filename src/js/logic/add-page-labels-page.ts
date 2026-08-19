@@ -20,6 +20,7 @@ import {
   resolvePageLabelStyle,
 } from '../utils/page-labels.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 let labelRuleCounter = 0;
 
@@ -505,7 +506,7 @@ async function addPageLabels() {
 
     downloadFile(
       new Blob([outputBytes], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'rotulos_pagina')
     );
     showAlert(
       translate('common.success', 'Sucesso'),

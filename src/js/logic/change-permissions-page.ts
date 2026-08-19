@@ -6,6 +6,7 @@ import {
   readFileAsArrayBuffer,
 } from '../utils/helpers.js';
 import { icons, createIcons } from 'lucide';
+import { withPdfSuffix } from '../utils/output-name.js';
 import { ChangePermissionsState, QpdfInstanceExtended } from '@/types';
 
 const pageState: ChangePermissionsState = {
@@ -233,7 +234,7 @@ async function changePermissions() {
     const blob = new Blob([new Uint8Array(outputFile)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, pageState.file.name);
+    downloadFile(blob, withPdfSuffix(pageState.file.name, 'permissoes'));
 
     if (loaderModal) loaderModal.classList.add('hidden');
 

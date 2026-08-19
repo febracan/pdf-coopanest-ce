@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const FILETYPE = 'xps';
 const EXTENSIONS = ['.xps', '.oxps'];
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pdfBlob = await pymupdf.convertToPdf(originalFile, {
           filetype: FILETYPE,
         });
-        const fileName = originalFile.name.replace(/\.[^.]+$/, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
 
         downloadFile(pdfBlob, fileName);
         hideLoader();
@@ -127,17 +128,22 @@ document.addEventListener('DOMContentLoaded', () => {
           const pdfBlob = await pymupdf.convertToPdf(file, {
             filetype: FILETYPE,
           });
-          const baseName = file.name.replace(/\.[^.]+$/, '');
           const pdfBuffer = await pdfBlob.arrayBuffer();
           const zipEntryName = deduplicateFileName(
-            `${baseName}.pdf`,
+            withPdfSuffix(file.name, 'convertido'),
             usedNames
           );
           zip.file(zipEntryName, pdfBuffer);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, `${FILETYPE}-converted.zip`);
+        downloadFile(
+          zipBlob,
+          withZipSuffix(
+            state.files[0]?.name || `${FILETYPE}-converted`,
+            'convertido'
+          )
+        );
 
         hideLoader();
 

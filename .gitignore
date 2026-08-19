@@ -64,3 +64,5 @@ VISUAL/
 strix_runs/
 # Config local do editor/agente (nao versionar)
 .claude/
+# Runbook interno de customização (notas de operação, não vai pro repo público)
+HEADERS-PDF-CUSTOMIZACAO.md

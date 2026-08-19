@@ -4,6 +4,7 @@ import { icons, createIcons } from 'lucide';
 import { SanitizePdfState } from '@/types';
 import { sanitizePdf } from '../utils/sanitize.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const pageState: SanitizePdfState = {
   file: null,
@@ -147,7 +148,7 @@ async function runSanitize() {
 
     downloadFile(
       new Blob([new Uint8Array(result.bytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'higienizado')
     );
     showAlert('Sucesso', 'O PDF foi higienizado e baixado.', 'success', () => {
       resetState();

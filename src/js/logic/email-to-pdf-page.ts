@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { parseEmailFile, renderEmailToHtml } from './email-to-pdf.js';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const EXTENSIONS = ['.eml', '.msg'];
 const TOOL_NAME = 'Email';
@@ -137,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
               content: a.content!,
             })),
         });
-        const fileName = originalFile.name.replace(/\.[^.]+$/, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
 
         downloadFile(pdfBlob, fileName);
         hideLoader();
@@ -182,16 +183,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   content: a.content!,
                 })),
             });
-            const baseName = file.name.replace(/\.[^.]+$/, '');
             const pdfBuffer = await pdfBlob.arrayBuffer();
-            zip.file(`${baseName}.pdf`, pdfBuffer);
+            zip.file(withPdfSuffix(file.name, 'convertido'), pdfBuffer);
           } catch (e: unknown) {
             console.error(`Failed to convert ${file.name}:`, e);
           }
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, 'emails-converted.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'emails', 'convertido')
+        );
 
         hideLoader();
 

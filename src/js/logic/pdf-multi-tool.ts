@@ -14,6 +14,7 @@ import { initializeGlobalShortcuts } from '../utils/shortcuts-init.js';
 import { repairPdfFile } from './repair-pdf.js';
 import { partitionIncomingFiles } from '../utils/multi-tool-file-input.js';
 import { convertImagesToPdfFile } from '../utils/images-to-pdf-lib.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -1273,12 +1274,18 @@ async function downloadSplitPdfs() {
       }
 
       const pdfBytes = await newPdf.save();
-      zip.file(`document - ${segIndex + 1}.pdf`, pdfBytes);
+      zip.file(
+        withPdfSuffix(`document - ${segIndex + 1}`, 'editado'),
+        pdfBytes
+      );
     }
 
     // Generate and download ZIP
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-    downloadFile(zipBlob, 'split-documents.zip');
+    downloadFile(
+      zipBlob,
+      withZipSuffix(allPages[0]?.fileName || 'documento', 'editado')
+    );
 
     showModal(
       'Sucesso',
@@ -1361,7 +1368,10 @@ async function downloadPagesAsPdf(indices: number[], filename: string) {
       type: 'application/pdf',
     });
 
-    downloadFile(blob, filename);
+    downloadFile(
+      blob,
+      withPdfSuffix(allPages[indices[0]]?.fileName || 'documento', 'editado')
+    );
     showModal('Sucesso', 'PDF baixado com sucesso.', 'success');
   } catch (e) {
     console.error('Failed to create PDF:', e);

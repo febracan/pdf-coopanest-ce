@@ -3,6 +3,7 @@ import { createIcons, icons } from 'lucide';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
 import { escapeHtml } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 // State management
 const pageState: { pdfDoc: PDFDocument | null; file: File | null } = {
@@ -145,7 +146,7 @@ async function processRemoveAnnotations() {
     const newPdfBytes = await pageState.pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'sem_anotacoes')
     );
     showAlert('Sucesso', 'Anotações removidas com sucesso!', 'success', () => {
       resetState();

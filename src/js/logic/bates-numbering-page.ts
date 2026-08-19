@@ -7,6 +7,7 @@ import JSZip from 'jszip';
 import Sortable from 'sortablejs';
 import { FileEntry, Position, StylePreset } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const FONT_MAP: Record<string, keyof typeof StandardFonts> = {
   Helvetica: 'Helvetica',
@@ -526,15 +527,18 @@ async function applyBatesNumbers() {
         new Blob([new Uint8Array(results[0].bytes)], {
           type: 'application/pdf',
         }),
-        results[0].name
+        withPdfSuffix(results[0].name, 'bates')
       );
     } else {
       const zip = new JSZip();
       for (const result of results) {
-        zip.file(result.name, result.bytes);
+        zip.file(withPdfSuffix(result.name, 'bates'), result.bytes);
       }
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadFile(zipBlob, 'bates_numbered.zip');
+      downloadFile(
+        zipBlob,
+        withZipSuffix(files[0]?.file.name || 'bates_numbered', 'bates')
+      );
     }
 
     showAlert(

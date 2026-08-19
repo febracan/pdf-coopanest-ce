@@ -8,6 +8,7 @@ import { makeUniqueFileKey } from '../utils/deduplicate-filename.js';
 import { showWasmRequiredDialog } from '../utils/wasm-provider.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { interleavePdfs } from '../utils/alternate-merge.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 const pageState: AlternateMergeState = {
   files: [],
@@ -184,7 +185,10 @@ async function mixPages() {
     const blob = new Blob([new Uint8Array(mergedBytes)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, 'alternated-mixed.pdf');
+    downloadFile(
+      blob,
+      withPdfSuffix(filesToMerge[0]?.name || 'documento', 'mesclado_alternado')
+    );
     showAlert(
       'Sucesso',
       'Os PDFs foram mesclados com sucesso!',

@@ -8,6 +8,7 @@ import { state } from '../state.js';
 import JSZip from 'jszip';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import type { QpdfInstanceExtended } from '@/types';
 
 export async function repairPdfFile(file: File): Promise<Uint8Array | null> {
@@ -112,18 +113,27 @@ export async function repairPdf() {
       const blob = new Blob([new Uint8Array(file.data)], {
         type: 'application/pdf',
       });
-      downloadFile(blob, file.name);
+      downloadFile(
+        blob,
+        withPdfSuffix(state.files[0]?.name || 'documento', 'reparado')
+      );
     } else {
       showLoader('Creating ZIP archive...');
       const zip = new JSZip();
       const usedNames = new Set<string>();
       successfulRepairs.forEach((file) => {
-        const zipEntryName = deduplicateFileName(file.name, usedNames);
+        const zipEntryName = deduplicateFileName(
+          withPdfSuffix(file.name, 'reparado'),
+          usedNames
+        );
         zip.file(zipEntryName, file.data);
       });
 
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadFile(zipBlob, 'repaired_pdfs.zip');
+      downloadFile(
+        zipBlob,
+        withZipSuffix(state.files[0]?.name || 'documentos', 'reparado')
+      );
       hideLoader();
     }
 

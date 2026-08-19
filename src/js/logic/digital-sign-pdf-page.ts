@@ -6,6 +6,7 @@ import {
   downloadFile,
 } from '../utils/helpers.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { t } from '../i18n/i18n';
 import {
   signPdf,
@@ -750,7 +751,10 @@ async function processSignature(): Promise<void> {
     const blob = new Blob([signedPdfBytes.slice().buffer], {
       type: 'application/pdf',
     });
-    downloadFile(blob, state.pdfFile?.name ?? 'document.pdf');
+    downloadFile(
+      blob,
+      withPdfSuffix(state.pdfFile?.name ?? 'document.pdf', 'assinado')
+    );
 
     hideLoader();
     showAlert(

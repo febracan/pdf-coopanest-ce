@@ -6,6 +6,7 @@ import {
   readFileAsArrayBuffer,
 } from '../utils/helpers.js';
 import { icons, createIcons } from 'lucide';
+import { withPdfSuffix } from '../utils/output-name.js';
 import type { OverlayPdfState, QpdfInstanceExtended } from '@/types';
 
 const pageState: OverlayPdfState = {
@@ -180,7 +181,7 @@ async function processOverlay() {
     const modeLabel = mode.replace('--', '');
     downloadFile(
       new Blob([new Uint8Array(outputFile)], { type: 'application/pdf' }),
-      pageState.baseFile.name
+      withPdfSuffix(pageState.baseFile.name, 'sobreposicao')
     );
 
     showAlert(

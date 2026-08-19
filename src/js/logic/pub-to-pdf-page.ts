@@ -7,6 +7,7 @@ import {
   type LoadProgress,
 } from '../utils/libreoffice-loader.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const ACCEPTED_EXTENSIONS = ['.pub'];
 const FILETYPE_NAME = 'PUB';
@@ -96,8 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const file = state.files[0];
         showLoader(`Convertendo ${file.name}...`);
         const pdfBlob = await converter.convertToPdf(file);
-        const baseName = file.name.replace(/\.[^/.]+$/, '');
-        downloadFile(pdfBlob, `${baseName}.pdf`);
+        downloadFile(pdfBlob, withPdfSuffix(file.name, 'convertido'));
         hideLoader();
         showAlert(
           'Conversão concluída',
@@ -116,15 +116,17 @@ document.addEventListener('DOMContentLoaded', () => {
             `Convertendo ${i + 1}/${state.files.length}: ${file.name}...`
           );
           const pdfBlob = await converter.convertToPdf(file);
-          const baseName = file.name.replace(/\.[^/.]+$/, '');
           const zipEntryName = deduplicateFileName(
-            `${baseName}.pdf`,
+            withPdfSuffix(file.name, 'convertido'),
             usedNames
           );
           zip.file(zipEntryName, pdfBlob);
         }
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, `${FILETYPE_NAME.toLowerCase()}-to-pdf.zip`);
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'documento', 'convertido')
+        );
         hideLoader();
         showAlert(
           'Conversão concluída',

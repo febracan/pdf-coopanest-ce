@@ -4,6 +4,7 @@ import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { convertXmlToPdf } from '../utils/xml-to-pdf.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const ACCEPTED_EXTENSIONS = ['.xml'];
 const FILETYPE_NAME = 'XML';
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         const baseName = file.name.replace(/\.[^/.]+$/, '');
-        downloadFile(pdfBlob, `${baseName}.pdf`);
+        downloadFile(pdfBlob, withPdfSuffix(file.name, 'convertido'));
 
         hideLoader();
         showAlert(
@@ -124,14 +125,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const baseName = file.name.replace(/\.[^/.]+$/, '');
           const zipEntryName = deduplicateFileName(
-            `${baseName}.pdf`,
+            withPdfSuffix(file.name, 'convertido'),
             usedNames
           );
           zip.file(zipEntryName, pdfBlob);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, `${FILETYPE_NAME.toLowerCase()}-to-pdf.zip`);
+        downloadFile(zipBlob, withZipSuffix(state.files[0].name, 'convertido'));
 
         hideLoader();
         showAlert(

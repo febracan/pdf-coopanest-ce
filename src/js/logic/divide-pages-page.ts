@@ -9,6 +9,7 @@ import { createIcons, icons } from 'lucide';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 const pageState: DividePagesState = {
   file: null,
@@ -179,7 +180,7 @@ async function dividePages() {
     const newPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'dividido')
     );
 
     showAlert(

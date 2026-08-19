@@ -9,6 +9,7 @@ import {
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import {
   ROTATION_MIN,
   ROTATION_MAX,
@@ -312,7 +313,7 @@ async function applyRotations() {
     const rotatedPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(rotatedPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'girado')
     );
 
     showAlert(

@@ -4,6 +4,7 @@ import { createIcons, icons } from 'lucide';
 import { PDFDocument as PDFLibDocument, rgb, PageSizes } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 interface NUpState {
   file: File | null;
@@ -202,7 +203,7 @@ async function nUpTool() {
     const newPdfBytes = await newDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'n_por_pagina')
     );
 
     showAlert(

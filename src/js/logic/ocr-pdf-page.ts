@@ -5,6 +5,7 @@ import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { icons, createIcons } from 'lucide';
 import { OcrState } from '@/types';
 import { performOcr } from '../utils/ocr.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 import {
   getAvailableTesseractLanguageEntries,
   resolveConfiguredTesseractAvailableLanguages,
@@ -465,7 +466,7 @@ document.addEventListener('DOMContentLoaded', async function () {
           new Blob([new Uint8Array(pageState.searchablePdfBytes)], {
             type: 'application/pdf',
           }),
-          pageState.file?.name || 'document.pdf'
+          withPdfSuffix(pageState.file?.name || 'document.pdf', 'ocr')
         );
       }
     });

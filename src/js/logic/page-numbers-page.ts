@@ -9,6 +9,7 @@ import {
   type PageNumberFormat,
 } from '../utils/pdf-operations.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 interface PageState {
   file: File | null;
@@ -181,7 +182,7 @@ async function addPageNumbers() {
       new Blob([resultBytes as unknown as BlobPart], {
         type: 'application/pdf',
       }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'numeracao')
     );
     showAlert(
       'Sucesso',

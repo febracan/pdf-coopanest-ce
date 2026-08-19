@@ -1,6 +1,7 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile } from '../utils/helpers.js';
 import { state } from '../state.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 import type { RedactionRect } from '@/types';
 
@@ -35,7 +36,7 @@ export async function redact(redactions: RedactionRect[], canvasScale: number) {
     const redactedBytes = await state.pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(redactedBytes)], { type: 'application/pdf' }),
-      state.files[0]?.name || 'document.pdf'
+      withPdfSuffix(state.files[0]?.name || 'document.pdf', 'censurado')
     );
   } catch (e) {
     console.error(e);

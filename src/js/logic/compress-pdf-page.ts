@@ -13,6 +13,10 @@ import { showWasmRequiredDialog } from '../utils/wasm-provider.js';
 import { loadPyMuPDF, isPyMuPDFAvailable } from '../utils/pymupdf-loader.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import type { PDFDocumentProxy } from 'pdfjs-dist';
+import Sortable from 'sortablejs';
+import { showFilePreview } from '../utils/file-preview.js';
+import { renderPageToCanvas } from '../utils/render-utils.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -245,6 +249,60 @@ async function compressToTarget(
   return best ? { ...best, fits: false } : null;
 }
 
+const compressDocs = new Map<File, PDFDocumentProxy>();
+const thumbFileMap = new WeakMap<HTMLElement, File>();
+let compressThumbObserver: IntersectionObserver | null = null;
+
+async function getCompressDoc(file: File): Promise<PDFDocumentProxy> {
+  let doc = compressDocs.get(file);
+  if (!doc) {
+    const bytes = await file.arrayBuffer();
+    doc = await pdfjsLib.getDocument({ data: bytes }).promise;
+    compressDocs.set(file, doc);
+  }
+  return doc;
+}
+
+function pruneCompressDocs(files: File[]): void {
+  for (const [file, doc] of compressDocs) {
+    if (!files.includes(file)) {
+      try {
+        doc.destroy();
+      } catch {
+        /* noop */
+      }
+      compressDocs.delete(file);
+    }
+  }
+}
+
+function createCompressThumbObserver(): IntersectionObserver {
+  if (compressThumbObserver) compressThumbObserver.disconnect();
+  compressThumbObserver = new IntersectionObserver(
+    (entries, obs) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const thumb = entry.target as HTMLElement;
+        obs.unobserve(thumb);
+        const file = thumbFileMap.get(thumb);
+        if (!file) return;
+        getCompressDoc(file)
+          .then((doc) => renderPageToCanvas(doc, 1, 0.5))
+          .then((canvas) => {
+            canvas.className = 'w-full h-full object-contain';
+            const badge = thumb.querySelector('.thumb-badge');
+            thumb.textContent = '';
+            thumb.appendChild(canvas);
+            if (badge) thumb.appendChild(badge);
+          })
+          .catch((e) => console.error('Erro ao renderizar miniatura:', e));
+      });
+    },
+    { root: null, rootMargin: '300px', threshold: 0.01 }
+  );
+  return compressThumbObserver;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
   const dropZone = document.getElementById('drop-zone');
@@ -313,56 +371,131 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  let gridSortable: Sortable | null = null;
+  const initializeGridSortable = () => {
+    const container = document.getElementById('file-display-area');
+    if (!container) return;
+    if (gridSortable) gridSortable.destroy();
+    gridSortable = Sortable.create(container, {
+      animation: 150,
+      draggable: '.pdf-card',
+      filter: '.no-drag',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      onStart: (evt: Sortable.SortableEvent) => {
+        evt.item.style.opacity = '0.5';
+      },
+      onEnd: (evt: Sortable.SortableEvent) => {
+        evt.item.style.opacity = '1';
+        const order = Array.from(container.querySelectorAll('.pdf-card')).map(
+          (el) => parseInt((el as HTMLElement).dataset.idx || '0', 10)
+        );
+        state.files = order.map((i) => state.files[i]);
+        updateUI();
+      },
+    });
+  };
+
   const updateUI = async () => {
     if (!compressOptions) return;
+    const fileDisplayArea = document.getElementById('file-display-area');
+    const fileControls = document.getElementById('file-controls');
+    const instructions = document.getElementById('compress-instructions');
+    pruneCompressDocs(state.files as File[]);
 
-    if (state.files.length > 0) {
-      const fileDisplayArea = document.getElementById('file-display-area');
-      if (fileDisplayArea) {
-        fileDisplayArea.innerHTML = '';
-
-        for (let index = 0; index < state.files.length; index++) {
-          const file = state.files[index];
-          const fileDiv = document.createElement('div');
-          fileDiv.className =
-            'flex items-center justify-between bg-gray-700 p-3 rounded-lg text-sm';
-
-          const infoContainer = document.createElement('div');
-          infoContainer.className = 'flex flex-col overflow-hidden';
-
-          const nameSpan = document.createElement('div');
-          nameSpan.className =
-            'truncate font-medium text-gray-200 text-sm mb-1';
-          nameSpan.textContent = file.name;
-
-          const metaSpan = document.createElement('div');
-          metaSpan.className = 'text-xs text-gray-400';
-          metaSpan.textContent = formatBytes(file.size);
-
-          infoContainer.append(nameSpan, metaSpan);
-
-          const removeBtn = document.createElement('button');
-          removeBtn.className =
-            'ml-4 text-red-400 hover:text-red-300 flex-shrink-0';
-          removeBtn.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4"></i>';
-          removeBtn.onclick = () => {
-            state.files = state.files.filter((_, i) => i !== index);
-            updateUI();
-          };
-
-          fileDiv.append(infoContainer, removeBtn);
-          fileDisplayArea.appendChild(fileDiv);
-        }
-
-        createIcons({ icons });
-      }
-      compressOptions.classList.remove('hidden');
-    } else {
+    if (state.files.length === 0) {
       compressOptions.classList.add('hidden');
-      // Clear file display area
-      const fileDisplayArea = document.getElementById('file-display-area');
+      if (fileControls) fileControls.classList.add('hidden');
+      if (instructions) instructions.classList.add('hidden');
+      if (dropZone) dropZone.classList.remove('hidden');
       if (fileDisplayArea) fileDisplayArea.innerHTML = '';
+      return;
     }
+
+    compressOptions.classList.remove('hidden');
+    if (fileControls) fileControls.classList.remove('hidden');
+    if (instructions) instructions.classList.remove('hidden');
+    if (dropZone) dropZone.classList.add('hidden');
+    if (!fileDisplayArea) return;
+
+    fileDisplayArea.innerHTML = '';
+    const observer = createCompressThumbObserver();
+
+    (state.files as File[]).forEach((file, index) => {
+      const card = document.createElement('div');
+      card.className =
+        'pdf-card group relative flex flex-col gap-2 p-2 border-2 border-gray-600 hover:border-indigo-500 rounded-lg bg-gray-700 transition-colors cursor-move select-none';
+      card.dataset.idx = String(index);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className =
+        'no-drag absolute top-1 right-1 z-10 bg-gray-900/80 hover:bg-red-600 text-white/80 hover:text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-colors';
+      deleteBtn.title = 'Remover';
+      deleteBtn.innerHTML =
+        '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>';
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        state.files = (state.files as File[]).filter((f) => f !== file);
+        updateUI();
+      });
+
+      const thumb = document.createElement('div');
+      thumb.className =
+        'thumb relative rounded-md overflow-hidden bg-gray-800 flex items-center justify-center w-full';
+      thumb.style.aspectRatio = '3 / 4';
+      thumbFileMap.set(thumb, file);
+
+      const skeleton = document.createElement('span');
+      skeleton.className = 'text-gray-500 text-xs animate-pulse';
+      skeleton.textContent = 'Carregando…';
+      thumb.appendChild(skeleton);
+
+      const badge = document.createElement('span');
+      badge.className =
+        'thumb-badge absolute bottom-1 left-1 bg-indigo-600 text-white text-[10px] px-1.5 py-0.5 rounded font-semibold shadow';
+      badge.textContent = formatBytes(file.size);
+      thumb.appendChild(badge);
+
+      card.title = 'Arraste para reordenar · dois cliques para pré-visualizar';
+      let lastClick = 0;
+      card.addEventListener('click', () => {
+        const now = Date.now();
+        if (now - lastClick < 350) {
+          lastClick = 0;
+          getCompressDoc(file)
+            .then((doc) => showFilePreview(doc, file.name))
+            .catch(() => {});
+        } else {
+          lastClick = now;
+        }
+      });
+
+      observer.observe(thumb);
+
+      const nameEl = document.createElement('p');
+      nameEl.className = 'text-xs text-gray-300 truncate w-full text-center';
+      nameEl.title = file.name;
+      nameEl.textContent = file.name;
+
+      card.append(deleteBtn, thumb, nameEl);
+      fileDisplayArea.appendChild(card);
+    });
+
+    const addTile = document.createElement('div');
+    addTile.className =
+      'add-tile flex flex-col items-center justify-center gap-1 min-h-[8rem] p-2 border-2 border-dashed border-gray-600 hover:border-indigo-500 rounded-lg bg-gray-800/40 text-gray-400 hover:text-indigo-400 cursor-pointer transition-colors';
+    addTile.title = 'Adicionar mais arquivos';
+    addTile.innerHTML =
+      '<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg><span class="text-xs">Adicionar</span>';
+    addTile.addEventListener('click', () => {
+      fileInput.value = '';
+      fileInput.click();
+    });
+    fileDisplayArea.appendChild(addTile);
+
+    createIcons({ icons });
+    initializeGridSortable();
   };
 
   const resetState = () => {
@@ -526,7 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showAlert('Erro', 'Não foi possível comprimir o arquivo.');
             return;
           }
-          downloadFile(result.blob, file.name);
+          downloadFile(result.blob, withPdfSuffix(file.name, 'comprimido'));
           if (result.fits) {
             showAlert(
               'Comprimido até caber ✓',
@@ -556,7 +689,10 @@ document.addEventListener('DOMContentLoaded', () => {
           );
           const r = await compressToTarget(f, targetBytes, convertToGrayscale);
           if (!r) continue;
-          zip.file(f.name, await r.blob.arrayBuffer());
+          zip.file(
+            withPdfSuffix(f.name, 'comprimido'),
+            await r.blob.arrayBuffer()
+          );
           if (!r.fits) notFit++;
         }
         const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -629,7 +765,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const savingsPercent =
           savings > 0 ? ((savings / originalFile.size) * 100).toFixed(1) : 0;
 
-        downloadFile(resultBlob, originalFile.name);
+        downloadFile(
+          resultBlob,
+          withPdfSuffix(originalFile.name, 'comprimido')
+        );
 
         hideLoader();
 
@@ -684,7 +823,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           totalCompressedSize += resultBytes.length;
-          zip.file(file.name, resultBytes);
+          zip.file(withPdfSuffix(file.name, 'comprimido'), resultBytes);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
@@ -694,7 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ? ((totalSavings / totalOriginalSize) * 100).toFixed(1)
             : 0;
 
-        downloadFile(zipBlob, 'compressed-pdfs.zip');
+        downloadFile(zipBlob, 'comprimidos.zip');
 
         hideLoader();
 
@@ -733,7 +872,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (fileInput && dropZone) {
     fileInput.addEventListener('change', (e) => {
-      handleFileSelect((e.target as HTMLInputElement).files);
+      const picked = (e.target as HTMLInputElement).files;
+      if (picked && picked.length > 0) {
+        // Seletor do Windows devolve a seleção invertida — reverte para
+        // respeitar a ordem de clique.
+        state.files = [...state.files, ...Array.from(picked).reverse()];
+        updateUI();
+      }
     });
 
     dropZone.addEventListener('dragover', (e) => {

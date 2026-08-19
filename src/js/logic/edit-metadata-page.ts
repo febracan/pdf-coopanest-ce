@@ -5,6 +5,7 @@ import { createIcons, icons } from 'lucide';
 import { PDFName, PDFString } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 const pageState: EditMetadataState = {
   file: null,
@@ -353,7 +354,7 @@ async function saveMetadata() {
     const newPdfBytes = await pageState.pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'metadados')
     );
 
     showAlert(

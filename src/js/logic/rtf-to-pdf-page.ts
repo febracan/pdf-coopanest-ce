@@ -7,6 +7,7 @@ import {
   type LoadProgress,
 } from '../utils/libreoffice-loader.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   state.files = [];
@@ -106,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pdfBlob = await converter.convertToPdf(originalFile);
 
-        const fileName = originalFile.name.replace(/\.rtf$/i, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
 
         downloadFile(pdfBlob, fileName);
 
@@ -132,10 +133,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const pdfBlob = await converter.convertToPdf(file);
 
-          const baseName = file.name.replace(/\.rtf$/i, '');
           const pdfBuffer = await pdfBlob.arrayBuffer();
           const zipEntryName = deduplicateFileName(
-            `${baseName}.pdf`,
+            withPdfSuffix(file.name, 'convertido'),
             usedNames
           );
           zip.file(zipEntryName, pdfBuffer);
@@ -143,7 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-        downloadFile(zipBlob, 'rtf-converted.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'documento', 'convertido')
+        );
 
         hideLoader();
 

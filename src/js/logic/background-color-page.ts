@@ -5,6 +5,7 @@ import { PDFDocument as PDFLibDocument, rgb } from 'pdf-lib';
 import { BackgroundColorState } from '@/types';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const pageState: BackgroundColorState = { file: null, pdfDoc: null };
 
@@ -140,7 +141,7 @@ async function changeBackgroundColor() {
     const newPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'cor_de_fundo')
     );
     showAlert(
       'Sucesso',

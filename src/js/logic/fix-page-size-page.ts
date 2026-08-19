@@ -2,6 +2,7 @@ import { showAlert } from '../ui.js';
 import { downloadFile, formatBytes, hexToRgb } from '../utils/helpers.js';
 import { fixPageSize as fixPageSizeCore } from '../utils/pdf-operations';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { icons, createIcons } from 'lucide';
 import { FixPageSizeState } from '@/types';
 
@@ -135,7 +136,10 @@ async function fixPageSize() {
 
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(
+        pageState.file?.name || 'document.pdf',
+        'tamanho_padronizado'
+      )
     );
     showAlert(
       'Sucesso',

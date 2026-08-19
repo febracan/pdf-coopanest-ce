@@ -6,6 +6,7 @@ import JSZip from 'jszip';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 interface ReverseState {
   files: File[];
@@ -124,7 +125,10 @@ async function reversePages() {
       showLoader(`Invertendo ${file.name} (${j + 1}/${validFiles.length})...`);
 
       const newPdfBytes = await reverseSingleFile(file);
-      const zipEntryName = deduplicateFileName(file.name, usedNames);
+      const zipEntryName = deduplicateFileName(
+        withPdfSuffix(file.name, 'invertido'),
+        usedNames
+      );
       zip.file(zipEntryName, newPdfBytes);
     }
 
@@ -133,11 +137,14 @@ async function reversePages() {
       const newPdfBytes = await reverseSingleFile(file);
       downloadFile(
         new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-        file.name
+        withPdfSuffix(file.name, 'invertido')
       );
     } else {
       const zipBlob = await zip.generateAsync({ type: 'blob' });
-      downloadFile(zipBlob, 'reversed_pdfs.zip');
+      downloadFile(
+        zipBlob,
+        withZipSuffix(validFiles[0]?.name || 'reversed_pdfs', 'invertido')
+      );
     }
 
     showAlert(

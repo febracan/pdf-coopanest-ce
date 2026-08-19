@@ -7,6 +7,7 @@ import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { icons, createIcons } from 'lucide';
 import JSZip from 'jszip';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 interface FontToOutlineState {
   files: File[];
@@ -124,7 +125,7 @@ async function processFiles() {
         if (loaderText) loaderText.textContent = msg;
       });
 
-      downloadFile(resultBlob, file.name);
+      downloadFile(resultBlob, withPdfSuffix(file.name, 'contornos'));
       if (loaderModal) loaderModal.classList.add('hidden');
     } else {
       if (loaderModal) loaderModal.classList.remove('hidden');
@@ -142,7 +143,10 @@ async function processFiles() {
         try {
           const resultBlob = await convertFileToOutlines(file, () => {});
           const arrayBuffer = await resultBlob.arrayBuffer();
-          const zipEntryName = deduplicateFileName(file.name, usedNames);
+          const zipEntryName = deduplicateFileName(
+            withPdfSuffix(file.name, 'contornos'),
+            usedNames
+          );
           zip.file(zipEntryName, arrayBuffer);
           processedCount++;
         } catch (e) {
@@ -152,7 +156,10 @@ async function processFiles() {
 
       if (processedCount > 0) {
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, 'outlined_pdfs.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(pageState.files[0]?.name || 'documento', 'contornos')
+        );
         showAlert(
           'Sucesso',
           `${processedCount} PDFs processados.`,

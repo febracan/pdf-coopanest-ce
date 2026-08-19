@@ -16,6 +16,7 @@ import { AddWatermarkState, PageWatermarkConfig } from '@/types';
 import * as pdfjsLib from 'pdfjs-dist';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -1011,7 +1012,7 @@ async function applyWatermark() {
 
     downloadFile(
       new Blob([new Uint8Array(resultBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'marca_dagua')
     );
     showAlert('Sucesso', "Marca d'água adicionada com sucesso!", 'success');
   } catch (e: unknown) {

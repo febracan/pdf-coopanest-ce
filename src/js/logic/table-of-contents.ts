@@ -6,6 +6,7 @@ import {
   WasmProvider,
 } from '../utils/wasm-provider.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { t } from '../i18n/index.js';
 
 const worker = new Worker(
@@ -184,7 +185,10 @@ worker.onmessage = (e: MessageEvent<TOCWorkerResponse>) => {
     const pdfBytes = new Uint8Array(pdfBytesBuffer);
 
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    downloadFile(blob, pdfFile?.name || 'document.pdf');
+    downloadFile(
+      blob,
+      withPdfSuffix(pdfFile?.name || 'document.pdf', 'com_sumario')
+    );
 
     showStatus(
       t('tools:tableOfContents.successGeneratedDownloadStarted'),

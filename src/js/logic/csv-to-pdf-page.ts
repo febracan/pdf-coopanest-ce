@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
           'bytes'
         );
 
-        const fileName = originalFile.name.replace(/\.csv$/i, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
         downloadFile(pdfBlob, fileName);
         console.log('[CSV2PDF] File downloaded:', fileName);
 
@@ -156,9 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pdfBlob.size
           );
 
-          const baseName = file.name.replace(/\.csv$/i, '');
           const pdfBuffer = await pdfBlob.arrayBuffer();
-          zip.file(`${baseName}.pdf`, pdfBuffer);
+          zip.file(withPdfSuffix(file.name, 'convertido'), pdfBuffer);
         }
 
         console.log('[CSV2PDF] Generating ZIP file...');
@@ -166,7 +166,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         console.log('[CSV2PDF] ZIP size:', zipBlob.size);
 
-        downloadFile(zipBlob, 'csv-converted.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'csv', 'convertido')
+        );
 
         hideLoader();
 

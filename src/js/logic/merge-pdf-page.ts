@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile } from '../utils/helpers.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 import { state } from '../state.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import {
@@ -453,7 +454,13 @@ export async function merge() {
       hideLoader();
       if (e.data.status === 'success') {
         const blob = new Blob([e.data.pdfBytes], { type: 'application/pdf' });
-        downloadFile(blob, 'merged.pdf');
+        downloadFile(
+          blob,
+          withPdfSuffix(
+            (state.files[0] as File)?.name || 'mesclado',
+            'mesclado'
+          )
+        );
         mergeState.mergeSuccess = true;
         showAlert(
           'Sucesso',

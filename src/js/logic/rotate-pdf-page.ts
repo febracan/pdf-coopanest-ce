@@ -10,6 +10,7 @@ import { rotatePdfPages } from '../utils/pdf-operations.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -250,7 +251,7 @@ async function applyRotations() {
       new Blob([rotatedPdfBytes as unknown as BlobPart], {
         type: 'application/pdf',
       }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'girado')
     );
 
     showAlert(

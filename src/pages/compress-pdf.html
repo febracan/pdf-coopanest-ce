@@ -156,13 +156,6 @@
 
         <div id="file-controls" class="hidden mt-4 flex gap-3">
           <button
-            id="add-more-btn"
-            class="btn bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
-          >
-            <i data-lucide="plus"></i>
-            <span data-i18n="upload.addMore">Adicionar Mais Arquivos</span>
-          </button>
-          <button
             id="clear-files-btn"
             class="btn bg-gray-700 hover:bg-gray-600 text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2"
           >
@@ -171,7 +164,23 @@
           </button>
         </div>
 
-        <div id="file-display-area" class="mt-4 space-y-2"></div>
+        <div
+          id="compress-instructions"
+          class="hidden p-3 bg-gray-900 rounded-lg border border-gray-700 mt-4"
+        >
+          <ul class="list-disc list-inside text-xs text-gray-400 space-y-1">
+            <li>Arraste as miniaturas para reorganizar os arquivos.</li>
+            <li>
+              Dê <strong>dois cliques</strong> na miniatura para pré-visualizar
+              o PDF.
+            </li>
+          </ul>
+        </div>
+
+        <div
+          id="file-display-area"
+          class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"
+        ></div>
 
         <div id="compress-options" class="hidden mt-6 space-y-6">
           <div>

@@ -9,6 +9,7 @@ import Cropper from 'cropperjs';
 import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -373,9 +374,10 @@ export async function setupCropperTool() {
         finalPdfBytes = await pdfToModify.save();
       }
 
-      const fileName = isDestructive
-        ? 'flattened_crop.pdf'
-        : 'standard_crop.pdf';
+      const fileName = withPdfSuffix(
+        state.files[0]?.name || 'documento',
+        'cortado'
+      );
       downloadFile(
         new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' }),
         fileName

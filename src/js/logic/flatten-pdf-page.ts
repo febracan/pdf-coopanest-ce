@@ -8,6 +8,7 @@ import JSZip from 'jszip';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
 import { FlattenPdfState } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const pageState: FlattenPdfState = {
   files: [],
@@ -137,7 +138,7 @@ async function flattenPdf() {
       const newPdfBytes = await pdfDoc.save();
       downloadFile(
         new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-        `flattened_${file.name}`
+        withPdfSuffix(file.name, 'achatado')
       );
       if (loaderModal) loaderModal.classList.add('hidden');
     } else {
@@ -174,7 +175,10 @@ async function flattenPdf() {
           }
 
           const flattenedBytes = await pdfDoc.save();
-          const zipEntryName = deduplicateFileName(file.name, usedNames);
+          const zipEntryName = deduplicateFileName(
+            withPdfSuffix(file.name, 'achatado'),
+            usedNames
+          );
           zip.file(zipEntryName, flattenedBytes);
           processedCount++;
         } catch (e) {
@@ -184,7 +188,10 @@ async function flattenPdf() {
 
       if (processedCount > 0) {
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, 'flattened_pdfs.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(pageState.files[0]?.name || 'documentos', 'achatado')
+        );
         showAlert(
           'Sucesso',
           `${processedCount} PDFs processados.`,

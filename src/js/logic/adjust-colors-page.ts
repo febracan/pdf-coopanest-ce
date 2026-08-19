@@ -12,6 +12,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import type { AdjustColorsSettings } from '../types/adjust-colors-type.js';
 import { t } from '../i18n/i18n';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -234,7 +235,7 @@ async function processAllPages(): Promise<void> {
     const resultBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(resultBytes)], { type: 'application/pdf' }),
-      files[0]?.name || 'document.pdf'
+      withPdfSuffix(files[0]?.name || 'document.pdf', 'cores_ajustadas')
     );
     showAlert(
       'Sucesso',

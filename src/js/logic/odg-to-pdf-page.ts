@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import {
@@ -107,8 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoader(`Convertendo ${file.name}...`);
         const pdfBlob = await converter.convertToPdf(file);
 
-        const baseName = file.name.replace(/\.[^/.]+$/, '');
-        downloadFile(pdfBlob, `${baseName}.pdf`);
+        downloadFile(pdfBlob, withPdfSuffix(file.name, 'convertido'));
 
         hideLoader();
         showAlert(
@@ -129,12 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
           );
           const pdfBlob = await converter.convertToPdf(file);
 
-          const baseName = file.name.replace(/\.[^/.]+$/, '');
-          zip.file(`${baseName}.pdf`, pdfBlob);
+          zip.file(withPdfSuffix(file.name, 'convertido'), pdfBlob);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, `${FILETYPE_NAME.toLowerCase()}-to-pdf.zip`);
+        downloadFile(zipBlob, withZipSuffix(state.files[0].name, 'convertido'));
 
         hideLoader();
         showAlert(

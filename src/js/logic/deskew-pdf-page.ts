@@ -3,6 +3,7 @@ import type { PyMuPDFInstance } from '@/types';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { createIcons, icons } from 'lucide';
 import { downloadFile } from '../utils/helpers';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { isWasmAvailable } from '../config/wasm-cdn-config.js';
 import { showWasmRequiredDialog } from '../utils/wasm-provider.js';
 
@@ -190,7 +191,7 @@ async function processDeskew(): Promise<void> {
 
       displayResults(result);
 
-      downloadFile(resultPdf, file.name);
+      downloadFile(resultPdf, withPdfSuffix(file.name, 'alinhado'));
     }
 
     hideLoader();

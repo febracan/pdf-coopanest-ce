@@ -9,6 +9,7 @@ import { PDFDocument } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import JSZip from 'jszip';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 interface ExtractState {
   file: File | null;
@@ -191,11 +192,20 @@ async function extractPages() {
       ]);
       newPdf.addPage(copiedPage);
       const pdfBytes = await newPdf.save();
-      zip.file(`${baseName}_page_${pageNum}.pdf`, pdfBytes);
+      zip.file(
+        withPdfSuffix(`${baseName}_page_${pageNum}`, 'paginas_extraidas'),
+        pdfBytes
+      );
     }
 
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-    downloadFile(zipBlob, `${baseName}_extracted_pages.zip`);
+    downloadFile(
+      zipBlob,
+      withZipSuffix(
+        extractState.file?.name || 'document.pdf',
+        'paginas_extraidas'
+      )
+    );
 
     hideLoader();
     showAlert(

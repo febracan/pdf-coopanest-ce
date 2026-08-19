@@ -2,6 +2,7 @@ import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 let files: File[] = [];
 let currentMode: 'upload' | 'text' = 'upload';
@@ -128,7 +129,10 @@ async function convert() {
       margins: 72,
     });
 
-    downloadFile(pdfBlob, 'text_to_pdf.pdf');
+    downloadFile(
+      pdfBlob,
+      withPdfSuffix(files[0]?.name || 'documento', 'convertido')
+    );
 
     showAlert(
       'Sucesso',

@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { createIcons, icons } from 'lucide';
 import { PDFDocument as PDFLibDocument, degrees, PageSizes } from 'pdf-lib';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -526,7 +527,7 @@ async function createBooklet() {
     const pdfBytes = await outputDoc.save();
     downloadFile(
       new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'livreto')
     );
 
     showAlert(

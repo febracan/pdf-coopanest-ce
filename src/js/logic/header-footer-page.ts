@@ -10,6 +10,7 @@ import { rgb, StandardFonts } from 'pdf-lib';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { HeaderFooterState } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 const pageState: HeaderFooterState = { file: null, pdfDoc: null };
 
@@ -242,7 +243,7 @@ async function addHeaderFooter() {
     const newPdfBytes = await pageState.pdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file?.name || 'document.pdf'
+      withPdfSuffix(pageState.file?.name || 'document.pdf', 'cabecalho_rodape')
     );
     showAlert(
       'Sucesso',

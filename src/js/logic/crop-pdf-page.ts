@@ -7,6 +7,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { PDFDocument as PDFLibDocument } from 'pdf-lib';
 import { CropperState, CropPercentages } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -293,7 +294,7 @@ async function performCrop() {
 
     downloadFile(
       new Blob([new Uint8Array(finalPdfBytes)], { type: 'application/pdf' }),
-      cropperState.file?.name || 'document.pdf'
+      withPdfSuffix(cropperState.file?.name || 'document.pdf', 'cortado')
     );
     showAlert(
       'Sucesso',

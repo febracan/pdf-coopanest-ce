@@ -6,6 +6,7 @@ import {
   readFileAsArrayBuffer,
 } from '../utils/helpers.js';
 import { icons, createIcons } from 'lucide';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { RemoveRestrictionsState, QpdfInstanceExtended } from '@/types';
 
 const pageState: RemoveRestrictionsState = {
@@ -153,7 +154,7 @@ async function removeRestrictions() {
     const blob = new Blob([new Uint8Array(outputFile)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, pageState.file.name);
+    downloadFile(blob, withPdfSuffix(pageState.file.name, 'sem_restricoes'));
 
     if (loaderModal) loaderModal.classList.add('hidden');
 

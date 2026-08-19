@@ -11,6 +11,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import { CombineSinglePageState } from '@/types';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -245,7 +246,7 @@ async function combineToSinglePage() {
     const newPdfBytes = await newDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      pageState.file.name
+      withPdfSuffix(pageState.file.name, 'pagina_unica')
     );
 
     showAlert(

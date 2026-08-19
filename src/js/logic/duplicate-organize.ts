@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { state } from '../state.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import {
@@ -222,7 +223,7 @@ export async function processAndSave() {
     const newPdfBytes = await newPdfDoc.save();
     downloadFile(
       new Blob([new Uint8Array(newPdfBytes)], { type: 'application/pdf' }),
-      state.files[0]?.name || 'document.pdf'
+      withPdfSuffix(state.files[0]?.name || 'document.pdf', 'organizado')
     );
   } catch (e) {
     console.error('Save error:', e);

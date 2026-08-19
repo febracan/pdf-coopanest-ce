@@ -10,6 +10,7 @@ import { deletePdfPages } from '../utils/pdf-operations.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import { DeletePagesState } from '@/types';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -271,7 +272,10 @@ async function deletePages() {
       new Blob([new Uint8Array(resultBytes)], {
         type: 'application/pdf',
       }),
-      deleteState.file?.name || 'document.pdf'
+      withPdfSuffix(
+        deleteState.file?.name || 'document.pdf',
+        'paginas_removidas'
+      )
     );
 
     hideLoader();

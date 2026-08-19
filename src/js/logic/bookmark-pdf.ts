@@ -14,6 +14,7 @@ import {
 } from '../utils/helpers.js';
 import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import {
   BookmarkNode,
   BookmarkTree,
@@ -2348,7 +2349,10 @@ downloadBtn?.addEventListener('click', async () => {
     const blob = new Blob([new Uint8Array(pdfBytes)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, `${originalFileName}.pdf`);
+    downloadFile(
+      blob,
+      withPdfSuffix(originalFileName || 'documento', 'marcadores')
+    );
 
     await showAlertModal('Sucesso', 'PDF salvo com sucesso!');
 

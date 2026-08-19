@@ -8,6 +8,7 @@ import {
 import { icons, createIcons } from 'lucide';
 import JSZip from 'jszip';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { LinearizePdfState, QpdfInstanceExtended } from '@/types';
 
 const pageState: LinearizePdfState = {
@@ -146,7 +147,7 @@ async function linearizePdf() {
         }
 
         const zipEntryName = deduplicateFileName(
-          `linearized-${file.name}`,
+          withPdfSuffix(file.name, 'linearizado'),
           usedNames
         );
         zip.file(zipEntryName, outputFile, { binary: true });
@@ -179,7 +180,10 @@ async function linearizePdf() {
 
     if (loaderText) loaderText.textContent = 'Gerando arquivo ZIP...';
     const zipBlob = await zip.generateAsync({ type: 'blob' });
-    downloadFile(zipBlob, 'linearized-pdfs.zip');
+    downloadFile(
+      zipBlob,
+      withZipSuffix(pdfFiles[0]?.name || 'documento', 'linearizado')
+    );
 
     let alertMessage = `${successCount} PDF(s) linearizado(s) com sucesso.`;
     if (errorCount > 0) {

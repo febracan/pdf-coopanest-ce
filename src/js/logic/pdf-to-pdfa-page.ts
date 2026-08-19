@@ -14,6 +14,7 @@ import type { PyMuPDFInstance } from '@/types';
 import { showWasmRequiredDialog } from '../utils/wasm-provider.js';
 import { batchDecryptIfNeeded } from '../utils/password-prompt.js';
 import { deduplicateFileName } from '../utils/deduplicate-filename.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -156,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
           (msg) => showLoader(msg)
         );
 
-        const fileName = originalFile.name.replace(/\.pdf$/i, '') + '_pdfa.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'pdfa');
 
         downloadFile(convertedBlob, fileName);
 
@@ -184,10 +185,9 @@ document.addEventListener('DOMContentLoaded', () => {
             showLoader(msg)
           );
 
-          const baseName = file.name.replace(/\.pdf$/i, '');
           const blobBuffer = await convertedBlob.arrayBuffer();
           const zipEntryName = deduplicateFileName(
-            `${baseName}_pdfa.pdf`,
+            withPdfSuffix(file.name, 'pdfa'),
             usedNames
           );
           zip.file(zipEntryName, blobBuffer);
@@ -195,7 +195,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
 
-        downloadFile(zipBlob, 'pdfa-converted.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'documento', 'pdfa')
+        );
 
         hideLoader();
 

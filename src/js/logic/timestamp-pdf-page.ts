@@ -9,6 +9,7 @@ import {
 } from '../utils/helpers.js';
 import { TIMESTAMP_TSA_PRESETS } from '../config/timestamp-tsa.js';
 import { timestampPdf } from './digital-sign-pdf.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 interface TimestampState {
   pdfFile: File | null;
@@ -225,7 +226,7 @@ async function processTimestamp(): Promise<void> {
     const blob = new Blob([new Uint8Array(timestampedBytes)], {
       type: 'application/pdf',
     });
-    downloadFile(blob, state.pdfFile.name);
+    downloadFile(blob, withPdfSuffix(state.pdfFile.name, 'carimbo'));
 
     showAlert(
       t('common.success'),

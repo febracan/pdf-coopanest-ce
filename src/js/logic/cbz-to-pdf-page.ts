@@ -1,5 +1,6 @@
 import { showLoader, hideLoader, showAlert } from '../ui.js';
 import { downloadFile, formatBytes } from '../utils/helpers.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
@@ -294,7 +295,7 @@ document.addEventListener('DOMContentLoaded', () => {
           pdfBlob = await convertCbrToPdf(originalFile);
         }
 
-        const fileName = originalFile.name.replace(/\.[^.]+$/, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
         downloadFile(pdfBlob, fileName);
         hideLoader();
 
@@ -321,13 +322,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pdfBlob = await convertCbrToPdf(file);
           }
 
-          const baseName = file.name.replace(/\.[^.]+$/, '');
           const pdfBuffer = await pdfBlob.arrayBuffer();
-          outputZip.file(`${baseName}.pdf`, pdfBuffer);
+          outputZip.file(withPdfSuffix(file.name, 'convertido'), pdfBuffer);
         }
 
         const zipBlob = await outputZip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, 'comic-converted.zip');
+        downloadFile(
+          zipBlob,
+          withZipSuffix(state.files[0]?.name || 'comic', 'convertido')
+        );
 
         hideLoader();
 

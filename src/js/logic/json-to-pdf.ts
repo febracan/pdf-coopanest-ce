@@ -11,6 +11,7 @@ import {
   WasmProvider,
 } from '../utils/wasm-provider.js';
 import { initI18n, t } from '../i18n/i18n';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const worker = new Worker(
   import.meta.env.BASE_URL + 'workers/json-to-pdf.worker.js'
@@ -131,7 +132,10 @@ worker.onmessage = async (e: MessageEvent) => {
 
       const zip = new JSZip();
       pdfFiles.forEach(({ name, data }) => {
-        const pdfName = name.replace(/\.json$/i, '.pdf');
+        const pdfName = withPdfSuffix(
+          name.replace(/\.json$/i, ''),
+          'convertido'
+        );
         const uint8Array = new Uint8Array(data);
         zip.file(pdfName, uint8Array);
       });
@@ -141,7 +145,10 @@ worker.onmessage = async (e: MessageEvent) => {
       const a = document.createElement('a');
       a.href = url;
       a.download = 'jsons-to-pdf.zip';
-      downloadFile(zipBlob, 'jsons-to-pdf.zip');
+      downloadFile(
+        zipBlob,
+        withZipSuffix(selectedFiles[0]?.name || 'jsons-to-pdf', 'convertido')
+      );
 
       showStatus(t('tools:jsonToPdf.status.success'), 'success');
 

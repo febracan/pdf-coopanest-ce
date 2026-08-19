@@ -7,6 +7,7 @@ import { loadPdfWithPasswordPrompt } from '../utils/password-prompt.js';
 import * as pdfjsLib from 'pdfjs-dist';
 import Sortable from 'sortablejs';
 import { loadPdfDocument } from '../utils/load-pdf-document.js';
+import { withPdfSuffix } from '../utils/output-name.js';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
@@ -382,7 +383,7 @@ async function saveChanges() {
     const pdfBytes = await newPdf.save();
     downloadFile(
       new Blob([pdfBytes as BlobPart], { type: 'application/pdf' }),
-      organizeState.file?.name || 'document.pdf'
+      withPdfSuffix(organizeState.file?.name || 'document.pdf', 'organizado')
     );
 
     hideLoader();

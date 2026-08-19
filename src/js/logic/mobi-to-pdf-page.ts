@@ -3,6 +3,7 @@ import { downloadFile, formatBytes } from '../utils/helpers.js';
 import { state } from '../state.js';
 import { createIcons, icons } from 'lucide';
 import { loadPyMuPDF } from '../utils/pymupdf-loader.js';
+import { withPdfSuffix, withZipSuffix } from '../utils/output-name.js';
 
 const FILETYPE = 'mobi';
 const EXTENSIONS = ['.mobi'];
@@ -100,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pdfBlob = await pymupdf.convertToPdf(originalFile, {
           filetype: FILETYPE,
         });
-        const fileName = originalFile.name.replace(/\.[^.]+$/, '') + '.pdf';
+        const fileName = withPdfSuffix(originalFile.name, 'convertido');
 
         downloadFile(pdfBlob, fileName);
         hideLoader();
@@ -125,13 +126,18 @@ document.addEventListener('DOMContentLoaded', () => {
           const pdfBlob = await pymupdf.convertToPdf(file, {
             filetype: FILETYPE,
           });
-          const baseName = file.name.replace(/\.[^.]+$/, '');
           const pdfBuffer = await pdfBlob.arrayBuffer();
-          zip.file(`${baseName}.pdf`, pdfBuffer);
+          zip.file(withPdfSuffix(file.name, 'convertido'), pdfBuffer);
         }
 
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadFile(zipBlob, `${FILETYPE}-converted.zip`);
+        downloadFile(
+          zipBlob,
+          withZipSuffix(
+            state.files[0]?.name || `${FILETYPE}-converted`,
+            'convertido'
+          )
+        );
 
         hideLoader();
 
