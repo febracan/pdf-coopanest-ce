@@ -1,280 +1,164 @@
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import { XMLParser } from 'fast-xml-parser';
 
 export interface XmlToPdfOptions {
   onProgress?: (percent: number, message: string) => void;
 }
 
-interface jsPDFWithAutoTable extends jsPDF {
-  lastAutoTable?: { finalY: number };
-}
-
-const ATTR_PREFIX = '@_';
-const TEXT_KEY = '#text';
-
+// Converte XML em PDF renderizando o CÓDIGO-FONTE indentado (uma tag por linha,
+// fonte monoespaçada), como um visualizador de fonte. É o que o padrão do
+// mercado faz para documentos estruturados (ex.: guias TISS da saúde): o time
+// precisa LER e DESTACAR valores no PDF, não uma tabela "interpretada".
+// Robusto para qualquer XML (nunca vira lixo) e respeita o encoding declarado
+// (muitos XML de saúde são ISO-8859-1, não UTF-8).
 export async function convertXmlToPdf(
   file: File,
   options?: XmlToPdfOptions
 ): Promise<Blob> {
   const { onProgress } = options || {};
 
-  onProgress?.(10, 'Reading XML file...');
-  const rawXmlText = await file.text();
-  const xmlText = String(rawXmlText)
-    .replace(/<!DOCTYPE[\s\S]*?>/gi, '')
-    .replace(/<!ENTITY[\s\S]*?>/gi, '')
-    .replace(/<\?xml-stylesheet[\s\S]*?\?>/gi, '');
+  onProgress?.(10, 'Lendo o arquivo XML...');
+  const buffer = await file.arrayBuffer();
+  const text = decodeXml(buffer);
 
-  onProgress?.(30, 'Parsing XML structure...');
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    attributeNamePrefix: ATTR_PREFIX,
-    textNodeName: TEXT_KEY,
-    allowBooleanAttributes: true,
-    parseTagValue: false,
-    parseAttributeValue: false,
-    trimValues: true,
-    processEntities: true,
-    ignoreDeclaration: true,
-    ignorePiTags: true,
-  });
+  onProgress?.(35, 'Formatando o conteúdo...');
+  const lines = xmlToLines(text);
 
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = parser.parse(xmlText) as Record<string, unknown>;
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    throw new Error('Invalid XML: ' + toSafeText(msg), { cause: err });
-  }
+  onProgress?.(55, 'Gerando o PDF...');
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageW = doc.internal.pageSize.getWidth();
+  const pageH = doc.internal.pageSize.getHeight();
 
-  const rootKeys = Object.keys(parsed);
-  if (rootKeys.length === 0) {
-    throw new Error('Invalid XML: no root element');
-  }
-  const rootName = rootKeys[0];
-  const rootValue = parsed[rootName];
+  const margin = 12;
+  const topText = margin + 6; // abaixo do cabeçalho
+  const bottom = pageH - 8;
+  const usableW = pageW - margin * 2;
+  const fontSize = 8;
+  const lineH = fontSize * 0.3528 * 1.2; // pt -> mm com leading
 
-  onProgress?.(50, 'Analyzing data structure...');
+  const drawHeader = () => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(file.name, margin, margin - 2, { baseline: 'bottom' });
+    doc.setDrawColor(220);
+    doc.line(margin, margin, pageW - margin, margin);
+    doc.setTextColor(0);
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(fontSize);
+  };
+  const drawFooter = (n: number) => {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(120);
+    doc.text(`Página ${n}`, pageW - margin, pageH - 4, { align: 'right' });
+    doc.setTextColor(0);
+  };
 
-  const doc: jsPDFWithAutoTable = new jsPDF({
-    orientation: 'landscape',
-    unit: 'mm',
-    format: 'a4',
-  });
+  // A indentação é aplicada como DESLOCAMENTO EM X (o splitTextToSize do jsPDF
+  // remove espaços à esquerda), preservando a hierarquia visual. As quebras de
+  // linhas longas mantêm o mesmo recuo do conteúdo.
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(fontSize);
+  const charW = doc.getTextWidth('0'); // mm por caractere (courier = monoespaçado)
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  let yPosition = 20;
+  let pageNum = 1;
+  let y = topText;
+  drawHeader();
 
-  doc.setFontSize(18);
-  doc.setFont('helvetica', 'bold');
-  doc.text(formatTitle(rootName), pageWidth / 2, yPosition, {
-    align: 'center',
-  });
-  yPosition += 15;
-
-  onProgress?.(60, 'Generating formatted content...');
-
-  if (isPlainObject(rootValue)) {
-    const rootObj = rootValue;
-    const childEntries = Object.entries(rootObj).filter(
-      ([k]) => !k.startsWith(ATTR_PREFIX) && k !== TEXT_KEY
-    );
-
-    if (childEntries.length > 0) {
-      const groups = groupChildrenByTagName(childEntries);
-
-      const renderableGroups: Array<[string, Record<string, unknown>[]]> = [];
-      for (const [groupName, elements] of Object.entries(groups)) {
-        const { headers, rows } = extractTableData(elements);
-        if (headers.length > 0 && rows.length > 0) {
-          renderableGroups.push([groupName, elements]);
-        }
+  for (const raw of lines) {
+    const expanded = raw.replace(/\t/g, '  ');
+    const indentLen = expanded.match(/^ */)?.[0].length ?? 0;
+    const content = expanded.slice(indentLen);
+    const x = margin + indentLen * charW;
+    const avail = Math.max(charW * 8, usableW - indentLen * charW);
+    const parts =
+      content === '' ? [''] : (doc.splitTextToSize(content, avail) as string[]);
+    for (const part of parts) {
+      if (y > bottom) {
+        drawFooter(pageNum);
+        doc.addPage();
+        pageNum++;
+        y = topText;
+        drawHeader();
       }
-
-      for (const [groupName, elements] of renderableGroups) {
-        const { headers, rows } = extractTableData(elements);
-
-        if (renderableGroups.length > 1) {
-          doc.setFontSize(14);
-          doc.setFont('helvetica', 'bold');
-          doc.text(formatTitle(groupName), 14, yPosition);
-          yPosition += 8;
-        }
-
-        autoTable(doc, {
-          head: [headers.map((h) => formatTitle(h))],
-          body: rows,
-          startY: yPosition,
-          styles: {
-            fontSize: 9,
-            cellPadding: 4,
-            overflow: 'linebreak',
-          },
-          headStyles: {
-            fillColor: [79, 70, 229],
-            textColor: 255,
-            fontStyle: 'bold',
-          },
-          alternateRowStyles: {
-            fillColor: [243, 244, 246],
-          },
-          margin: { top: 20, left: 14, right: 14 },
-          theme: 'striped',
-          didDrawPage: (data) => {
-            yPosition = (data.cursor?.y || yPosition) + 10;
-          },
-        });
-
-        yPosition = (doc.lastAutoTable?.finalY || yPosition) + 15;
-      }
-    } else {
-      const kvPairs = extractKeyValuePairs(rootObj);
-      if (kvPairs.length > 0) {
-        autoTable(doc, {
-          head: [['Property', 'Value']],
-          body: kvPairs,
-          startY: yPosition,
-          styles: {
-            fontSize: 10,
-            cellPadding: 5,
-          },
-          headStyles: {
-            fillColor: [79, 70, 229],
-            textColor: 255,
-            fontStyle: 'bold',
-          },
-          columnStyles: {
-            0: { fontStyle: 'bold', cellWidth: 60 },
-            1: { cellWidth: 'auto' },
-          },
-          margin: { left: 14, right: 14 },
-          theme: 'striped',
-        });
-      }
+      if (part !== '') doc.text(part, x, y, { baseline: 'top' });
+      y += lineH;
     }
   }
+  drawFooter(pageNum);
 
-  onProgress?.(90, 'Finalizing PDF...');
-
+  onProgress?.(95, 'Finalizando...');
   const pdfBlob = doc.output('blob');
-
-  onProgress?.(100, 'Complete!');
+  onProgress?.(100, 'Concluído!');
   return pdfBlob;
 }
 
-function isPlainObject(val: unknown): val is Record<string, unknown> {
-  return val !== null && typeof val === 'object' && !Array.isArray(val);
-}
-
-function groupChildrenByTagName(
-  entries: [string, unknown][]
-): Record<string, Record<string, unknown>[]> {
-  const groups: Record<string, Record<string, unknown>[]> = {};
-  for (const [tagName, value] of entries) {
-    const items = Array.isArray(value) ? value : [value];
-    const normalized: Record<string, unknown>[] = items.map((v) => {
-      if (isPlainObject(v)) return v;
-      if (v == null) return {};
-      return { [TEXT_KEY]: String(v) };
-    });
-    groups[tagName] = normalized;
+// Decodifica os bytes respeitando o encoding declarado no cabeçalho XML.
+function decodeXml(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  // BOM UTF-8
+  if (bytes[0] === 0xef && bytes[1] === 0xbb && bytes[2] === 0xbf) {
+    return new TextDecoder('utf-8').decode(bytes);
   }
-  return groups;
-}
-
-function extractTableData(elements: Record<string, unknown>[]): {
-  headers: string[];
-  rows: string[][];
-} {
-  if (elements.length === 0) return { headers: [], rows: [] };
-
-  const headerSet = new Set<string>();
-  for (const element of elements) {
-    for (const key of Object.keys(element)) {
-      if (key.startsWith(ATTR_PREFIX)) continue;
-      if (key === TEXT_KEY) continue;
-      headerSet.add(key);
+  // Lê a declaração <?xml ... encoding="..."?> em ASCII (primeiros bytes).
+  const head = new TextDecoder('ascii').decode(bytes.subarray(0, 256));
+  const m = head.match(/encoding\s*=\s*["']([^"']+)["']/i);
+  let charset = (m ? m[1] : 'utf-8').toLowerCase().trim();
+  if (charset === 'latin1' || charset === 'latin-1') charset = 'iso-8859-1';
+  try {
+    return new TextDecoder(charset, { fatal: false }).decode(bytes);
+  } catch {
+    // Encoding desconhecido -> tenta UTF-8 e, por fim, ISO-8859-1.
+    try {
+      return new TextDecoder('utf-8').decode(bytes);
+    } catch {
+      return new TextDecoder('iso-8859-1').decode(bytes);
     }
   }
-  const headers = Array.from(headerSet);
-  if (headers.length === 0) return { headers: [], rows: [] };
-
-  const rows: string[][] = [];
-  for (const element of elements) {
-    const row: string[] = [];
-    for (const header of headers) {
-      row.push(toSafeText(stringifyValue(element[header])));
-    }
-    rows.push(row);
-  }
-
-  return { headers, rows };
 }
 
-function extractKeyValuePairs(obj: Record<string, unknown>): string[][] {
-  const pairs: string[][] = [];
-
-  for (const [key, val] of Object.entries(obj)) {
-    if (key.startsWith(ATTR_PREFIX)) continue;
-    if (key === TEXT_KEY) continue;
-    const strVal = toSafeText(stringifyValue(val));
-    if (strVal) {
-      pairs.push([formatTitle(key), strVal]);
-    }
+// Se o XML já vier indentado (uma tag por linha), preserva o original (fiel ao
+// que o usuário vê). Se vier "minificado", re-indenta para ficar legível.
+function xmlToLines(text: string): string[] {
+  const norm = text.replace(/\r\n?/g, '\n').replace(/[ \t]+$/gm, '');
+  const newlineCount = (norm.match(/\n/g) || []).length;
+  const longest = norm.split('\n').reduce((mx, l) => Math.max(mx, l.length), 0);
+  if (newlineCount >= 5 && longest < 2000) {
+    return norm.split('\n');
   }
-
-  for (const [key, val] of Object.entries(obj)) {
-    if (!key.startsWith(ATTR_PREFIX)) continue;
-    const attrName = key.slice(ATTR_PREFIX.length);
-    pairs.push([formatTitle(attrName), toSafeText(stringifyValue(val))]);
-  }
-
-  return pairs;
+  return prettyPrintXml(norm).split('\n');
 }
 
-function stringifyValue(val: unknown): string {
-  if (val == null) return '';
-  if (typeof val === 'string') return val;
-  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
-  if (Array.isArray(val)) {
-    return val
-      .map((v) => stringifyValue(v))
-      .filter((s) => s.length > 0)
-      .join(', ');
-  }
-  if (isPlainObject(val)) {
-    const parts: string[] = [];
-    if (TEXT_KEY in val) {
-      const t = stringifyValue(val[TEXT_KEY]);
-      if (t) parts.push(t);
+// Re-indenta XML "minificado" a partir do texto (sem parse -> preserva todo o
+// conteúdo/atributos/valores; só normaliza a quebra e a indentação entre tags).
+function prettyPrintXml(xml: string): string {
+  const normalized = xml
+    .replace(/\r\n?/g, '\n')
+    .replace(/>\s*</g, '><') // remove espaço entre tags
+    .replace(/></g, '>\n<'); // uma tag por linha
+  const lines = normalized.split('\n');
+  const pad = '  ';
+  let indent = 0;
+  const out: string[] = [];
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const isClose = /^<\//.test(line);
+    const isDeclOrComment = /^<[?!]/.test(line);
+    const isSelfClose = /\/>\s*$/.test(line);
+    const isInlineClose = /^<[^!?/][^>]*>.*<\/[^>]+>\s*$/.test(line); // <t>val</t>
+    if (isClose) indent = Math.max(0, indent - 1);
+    out.push(pad.repeat(indent) + line);
+    const isOpen = /^<[^!?/]/.test(line);
+    if (
+      isOpen &&
+      !isClose &&
+      !isDeclOrComment &&
+      !isSelfClose &&
+      !isInlineClose
+    ) {
+      indent++;
     }
-    for (const [k, v] of Object.entries(val)) {
-      if (k.startsWith(ATTR_PREFIX)) continue;
-      if (k === TEXT_KEY) continue;
-      const inner = stringifyValue(v);
-      if (inner) parts.push(inner);
-    }
-    return parts.join(' ');
   }
-  return String(val);
-}
-
-function toSafeText(raw: string | null | undefined): string {
-  if (raw == null) return '';
-  return (
-    String(raw)
-      // eslint-disable-next-line no-control-regex
-      .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
-      .trim()
-  );
-}
-
-function formatTitle(tagName: string): string {
-  return tagName
-    .replace(/[_-]/g, ' ')
-    .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .split(' ')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+  return out.join('\n');
 }

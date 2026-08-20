@@ -27,6 +27,12 @@ const baseCategories = [
         icon: 'ph-browsers',
         subtitle: 'Combine multiple PDFs into one file. Preserves Bookmarks.',
       },
+      {
+        href: import.meta.env.BASE_URL + 'xml-to-pdf.html',
+        name: 'XML to PDF',
+        icon: 'ph-file-code',
+        subtitle: 'Convert XML documents to PDF.',
+      },
     ],
   },
   {
